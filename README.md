@@ -59,31 +59,78 @@ If the server starts successfully, you'll see the following output:
 //updateCard
 
 
-1 - Cria game
+# UNO!
 
-2 - Entra no jogo,
-(adiciona um player no game criado),
-(não deve permitir que seja possivel entrar no jogo já iniciado),
-(verificar quantidade de jogadores, limite n),
-(atribuir o numero do player),
-(já gera as 7 cartas)
+//game //create //start //endGame_uno // //player //buyCard (quantity: int, playerName) //endpoints: Comprar+4, Livre, default=1 // //buySpecificCard (playerName: String, uuidCard: uuid) //unoNotify // //card //createCard //removeCard //updateCard
 
-3 - Inicia o jogo, (altera o status para in_game)
 
-4 - Compra carta, (define quantidades que deve comprar e o usuario)
 
-5 - Lança carta,
-(verifica a vez do player),
-(verifica se bate com as caracteristicas da ultima carta lançada, cor ou nome),
-(caso bata, deve subtrair do baralho),
-(caso a carta seja especial, deve impactar o proximo player),
-(caso a carta seja de bloqueio, deve pular a vez do proximo), -> if(card.bloqued) { playerturn = Player.number + 2},
-(troca o turno para o proximo player),
-(verifica se o player está apenas com uma carta e se não foi sinalizado uno, caso não tenha sido senalizado, penalizar com +2),
-(faz uma contagem de carta após subtrair a carta lançada, caso ele não tenha mais cartas, encerra o jogo)
+## Model
 
-6 - UNO! (Ao chegar em uma carta o player deverá enviar um sinal de uno, caso contrario, será penalizado com +4 cartas na troca de turnos)
+- O que considerar para estar pronto?
 
-7 - Encerra o jogo (altera o status do game para Game Over)
+  R: Todos os vos/model e os passos completos e acessiveis
+
+- **Card**
+  - [ ]  Criar o data class Card
+
+    id: UUID
+
+    color: **Colors**
+
+    especial: **SpecialType**
+
+    name: String
+
+    png: String
+
+  - **Colors**
+    - [ ]  Criar enum Colors
+    - [ ]  Incluir as cores: vermelho, azul, amarelo, verde e preto
+  - **SpecialType**
+    - [ ]  Criar enum SpecialType
+    - [ ]  Deve incluir no enum: NONE, BLOCK, REVERSE, BUY_TWO, BUY_FOUR, CHANGE_COLOR
+  - **CardsInTable**
+    - [ ]  Criar VO CardsMovements
+
+- **PlayerLimit**
+
+
+
+## Endpoints
+
+- O que considerar para estar pronto?
+
+  R: Todos os endpoints e os passos completos e funcionais
+
+- **Cria game**
+  - [ ]  Cria game
+  - [ ] 
+- **Entra no jogo**
+  - [ ]  Entra no jogo - Adiciona um player no game criado
+  - [ ]  Não deve permitir que seja possivel entrar em um jogo já iniciado
+  - [ ]  verificar quantidade de jogadores, limite, n
+  - [ ]  atribuir o numero do player
+  - [ ]  já gerar 7 cartas assim que um player sem adicionado no jogo
+- **Inicia o jogo**
+  - [ ]  Altera o status para in_game
+- **Compra carta**
+  - [ ]  Define quantidades que deve comprar e o usuario
+- **Lança carta**
+  - [ ]  Verifica a vez do player
+  - [ ]  Verifica se bate com as caracteristicas da ultima carta lançada, cor ou nome
+  - [ ]  caso bata, deve subtrair do baralho do jogador
+  - [ ]  caso a carta seja especial, deve impactar o proximo player
+  - [ ]  caso a carta seja de bloqueio, deve pular a vez do proximo
+
+    Exemplo: if(card.blocked){ playerturn = Player.number +2}
+
+  - [ ]  troca o turno para o proximo player
+  - [ ]  verifica se o player está apenas com uma carta e se não foi sinalizado uno, caso não tenha sido sinalizado, penalizar com +2
+  - [ ]  faz uma contagem de carta após subtrair a carta lançada, caso não tenha mais cartas, encerra o jogo
+- UNO!
+  - [ ]  Ao chegar em uma carta o player deverá enviar um sinal de uno, caso contrario, será penalizado com + cartas na troca de turnos
+- **Encerra o jogo**
+  - [ ]  Altera o status do game para Game Over
 
 Fazer um player Number auto increment no mongo
