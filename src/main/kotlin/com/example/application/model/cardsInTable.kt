@@ -1,6 +1,5 @@
 package com.example.application.model
 
-import com.example.application.model.vo.CardsMovements
 import kotlinx.serialization.json.Json
 
 const val DECK = """
@@ -386,8 +385,4 @@ const val DECK = """
 ]
 """
 
-val newCardDeck: List<Card> =  Json.decodeFromString(DECK)
-
-val cardsInTable: MutableList<Card> = mutableListOf(CardsMovements().firstCardOnStack())
-
-val cardsInStack: MutableList<Card> = newCardDeck.toMutableList()
+val newCardDeck: List<Card> =  Json.decodeFromString(DECK) //criar uma classe para cada um dessas variaveis

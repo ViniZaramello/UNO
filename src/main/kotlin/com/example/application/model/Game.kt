@@ -1,8 +1,8 @@
 package com.example.application.model
 
-import com.example.application.model.vo.CardsMovements
 import com.example.application.model.vo.PlayerLimit
-import java.util.UUID
+import com.example.application.model.vo.StackCards
+import java.util.*
 
 data class Game(
     val id: UUID = UUID.randomUUID(),
@@ -12,7 +12,11 @@ data class Game(
     val players: List<Player>? = null,
     val playerTurn: Int = 1,
     val leader: Player,
-    val cardsInTable: CardsMovements //criar vo
-    //criar classe que estenda cardsInTable que consulte as outras lista, busca, adiciona, remove, limpa
-
-)
+    val stacks: StackCards
+){
+    fun resetGame() {
+        stacks.cardsInDeck.clear()
+        stacks.cardsInTable.clear()
+        stacks.cardsInDeck.addAll(newCardDeck)
+    }
+}
