@@ -4,6 +4,16 @@ data class Player (
     val name: String,
     val number: Int = 1,
     val lastCardPlayed: Card? = null,
-    val statusInGame: PlayerStatus = PlayerStatus.IN_LOBBY,
-    val cards: List<Card>
-)
+    var lastCard: Boolean = false,
+    val passphrase: String,
+    val owner: Boolean = false,
+    var statusInGame: PlayerStatus = PlayerStatus.IN_LOBBY,
+    val cards: MutableList<Card> = mutableListOf(),
+) {
+    fun resetCards(){
+        cards.clear()
+    }
+
+    fun isLastCard() = lastCard && cards.size == 1
+
+}
