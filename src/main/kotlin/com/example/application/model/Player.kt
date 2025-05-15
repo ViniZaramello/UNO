@@ -2,7 +2,7 @@ package com.example.application.model
 
 data class Player (
     val name: String,
-    val number: Int = 1,
+    var number: Int = 1,
     val lastCardPlayed: Card? = null,
     var lastCard: Boolean = false,
     val passphrase: String,
@@ -16,4 +16,5 @@ data class Player (
 
     fun isLastCard() = lastCard && cards.size == 1
 
+    fun isOwner() = owner
 }

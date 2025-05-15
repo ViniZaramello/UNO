@@ -5,5 +5,5 @@ import java.util.UUID
 
 data class JoinPlayerInGame(
     val player: Player,
-    val gameId: UUID
+    val gameId: String
 ): CommandHandler

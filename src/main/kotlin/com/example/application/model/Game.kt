@@ -7,11 +7,11 @@ import java.util.UUID
 data class Game(
     val id: UUID = UUID.randomUUID(),
     val gameMode: GameMode = GameMode.DEFAULT,
-    val status: GameStatus = GameStatus.CREATED,
+    var status: GameStatus = GameStatus.CREATED,
     val playerLimit: PlayerLimit,
     val players: MutableList<Player> = mutableListOf(),
-    val playerTurn: Int = 1,
-    var leader: List<Player> = listOf() ,
+    var playerTurn: Int = 1,
+    var leader: List<Player> = listOf(),
     val stacks: StackCards = StackCards(),
     val firstCard: Card = stacks.getFirstCard()
 ){
@@ -32,4 +32,12 @@ data class Game(
             player.cards.addAll(stacks.getRandomCards(7))
         }
     }
+
+    fun playerTurn(player: Player) = (playerTurn == player.number)
+
+    fun playerNumber(): Int {
+        check(players.size >= playerLimit.playerLimit) {"Player limit exceeded for $playerLimit"}
+        return players.size + 1
+    }
+
 }

@@ -1,14 +1,17 @@
 package com.example.application.model.vo
 
-import com.example.application.handler.FirstCardOnTable
 import com.example.application.model.Card
 import com.example.application.model.SpecialType.NONE
 import com.example.application.model.newCardDeck
 
 class StackCards(
     val cardsInDeck: MutableList<Card> = newCardDeck.toMutableList(),
-    val cardsInTable: MutableList<Card> = mutableListOf(FirstCardOnTable().firstCardOnStack())
+    val cardsInTable: MutableList<Card> = mutableListOf()
 ) {
+    init {
+        cardsInTable.add(getFirstCard())
+    }
+
     private fun stackIsEmpty(): Boolean = cardsInDeck.isEmpty()
 
     fun getRandomCard(): Card {
