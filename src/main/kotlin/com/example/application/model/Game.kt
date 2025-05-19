@@ -8,12 +8,12 @@ data class Game(
     val id: UUID = UUID.randomUUID(),
     val gameMode: GameMode = GameMode.DEFAULT,
     var status: GameStatus = GameStatus.CREATED,
-    val playerLimit: PlayerLimit,
+    val playerLimit: PlayerLimit = PlayerLimit(),
     val players: MutableList<Player> = mutableListOf(),
     var playerTurn: Int = 1,
     var leader: List<Player> = listOf(),
     val stacks: StackCards = StackCards(),
-    val firstCard: Card = stacks.getFirstCard()
+    val firstCard: Card = stacks.cardsInTable.first()
 ){
 
     fun resetGame() {

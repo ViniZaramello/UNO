@@ -7,14 +7,15 @@ import com.example.application.model.vo.PlayerLimit
 import com.example.application.ports.inbound.CommandHandler
 
 class CreateGameHandler(
-) : CommandHandler<CreateGame, Unit> {
-    override suspend fun handle(command: CreateGame) {
+) : CommandHandler<CreateGame, String> {
+    override suspend fun handle(command: CreateGame): String {
 
         val game = Game(
             players = mutableListOf(command.player),
-            playerLimit = PlayerLimit(),
         )
 
         Games().games.add(game)
+
+        return game.id.toString()
     }
 }
