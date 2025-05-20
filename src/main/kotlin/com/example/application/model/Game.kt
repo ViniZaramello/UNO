@@ -36,7 +36,7 @@ data class Game(
     fun playerTurn(player: Player) = (playerTurn == player.number)
 
     fun playerNumber(): Int {
-        check(players.size >= playerLimit.playerLimit) {"Player limit exceeded for $playerLimit"}
+        check(players.size < playerLimit.playerLimit) {"Player limit exceeded for $playerLimit"}
         return players.size + 1
     }
 

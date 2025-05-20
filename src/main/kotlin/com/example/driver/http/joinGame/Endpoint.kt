@@ -1,6 +1,6 @@
-package com.example.driver.http.createGame
+package com.example.driver.http.joinGame
 
-import com.example.application.command.CreateGame
+import com.example.application.command.JoinPlayerInGame
 import com.example.application.ports.inbound.CommandHandler
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -8,20 +8,20 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
+
 class Endpoint(
-    private val handler: CommandHandler<CreateGame, String>
+    private val handler: CommandHandler<JoinPlayerInGame, Unit>
 ) {
-    suspend fun command(request: CreateGame): String {
-        return handler.handle(request)
+    suspend fun command(request: JoinPlayerInGame) {
+        handler.handle(request)
     }
 }
 
-fun Application.createGameRoute(handler: CommandHandler<CreateGame, String>) {
+fun Application.joinGameRoute(handler: CommandHandler<JoinPlayerInGame, Unit>) {
 
     routing {
         route("/game") {
-            post("/createGame") {
-
+            post("/joinGame") {
                 val request = call.receive<Request>()
                 val command = request.toCommand()
                 val errorList: List<String> = validateRequest(request)
@@ -30,8 +30,8 @@ fun Application.createGameRoute(handler: CommandHandler<CreateGame, String>) {
                         errorList.joinToString(", "),
                         status = HttpStatusCode.BadRequest
                     )
-                val gameId = Endpoint(handler).command(command)
-                call.respond(HttpStatusCode.Created,"Room identifier code: $gameId" )
+                Endpoint(handler).command(command)
+                call.respond(HttpStatusCode.NoContent)
             }
         }
     }
@@ -44,6 +44,9 @@ fun validateRequest(request: Request): MutableList<String> {
 
     if (request.passphrase.isBlank())
         errorList.add("Passphrase is required")
+
+    if (request.gameId.isBlank())
+        errorList.add("gameId is required")
 
     return errorList
 }

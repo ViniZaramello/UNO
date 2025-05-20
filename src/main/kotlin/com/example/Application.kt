@@ -1,14 +1,16 @@
 package com.example
 
+import com.example.application.handler.CreateGameHandler
+import com.example.application.handler.JoinPlayerInGameHandler
+import com.example.application.model.Games
 import com.example.configuration.configureFrameworks
 import com.example.configuration.configureHTTP
+import io.ktor.serialization.kotlinx.json.*
+import io.ktor.server.application.*
+import io.ktor.server.engine.*
+import io.ktor.server.netty.*
+import io.ktor.server.plugins.contentnegotiation.*
 import com.example.driver.http.endpointConfig as gameEndpoint
-import io.ktor.serialization.kotlinx.json.json
-import io.ktor.server.application.Application
-import io.ktor.server.application.install
-import io.ktor.server.engine.embeddedServer
-import io.ktor.server.netty.Netty
-import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 
 fun main() {
     embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
@@ -16,7 +18,13 @@ fun main() {
         configureHTTP()
         configureSerialization()
         configureRouting()
-        gameEndpoint()
+
+        val games = Games()
+
+        val createGameHandler = CreateGameHandler(games)
+        val joinPlayerInGameHandler = JoinPlayerInGameHandler(games)
+
+        gameEndpoint(createGameHandler, joinPlayerInGameHandler)
     }.start(wait = true)
 }
 
