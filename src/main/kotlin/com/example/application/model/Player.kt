@@ -16,5 +16,5 @@ data class Player (
 
     fun isLastCard() = lastCard && cards.size == 1
 
-    fun isOwner() = owner
+    fun isOwner() = require(owner) { "Player $name is not the owner of game" }
 }

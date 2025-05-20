@@ -40,4 +40,9 @@ data class Game(
         return players.size + 1
     }
 
+    fun findPlayer(playerName: String): Player {
+        val player = players.find { it.name == playerName }
+            ?: throw IllegalArgumentException("Player $playerName not found in game")
+        return player
+    }
 }

@@ -6,16 +6,13 @@ import com.example.application.model.Games
 import com.example.application.ports.inbound.CommandHandler
 
 class JoinPlayerInGameHandler(
-    private val game: Games
+    private val games: Games
 ) : CommandHandler<JoinPlayerInGame, Unit> {
     override suspend fun handle(command: JoinPlayerInGame) {
         val (playerInfo, gameId) = command
+        val gameInfo = games.findGameById(gameId)
 
-        val gameInfo =
-            game.games.find { it.id.toString() == gameId } ?: throw IllegalArgumentException("Game $gameId not found")
-
-        if (gameInfo.status == GameStatus.CREATED)
-            throw IllegalArgumentException("Game $gameId is not available")
+        require(gameInfo.status == GameStatus.CREATED) { "Game $gameId is not available" }
 
         playerInfo.number = gameInfo.playerNumber()
         gameInfo.players.add(playerInfo)

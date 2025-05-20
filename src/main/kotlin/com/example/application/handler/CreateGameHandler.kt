@@ -14,7 +14,7 @@ class CreateGameHandler(
             players = mutableListOf(command.player),
         )
 
-        Games().games.add(game)
+        Games().addGame(game)
 
         return game.id.toString()
     }
