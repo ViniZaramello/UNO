@@ -8,18 +8,18 @@ import com.example.application.ports.inbound.CommandHandler
 
 class EndGameHandler : CommandHandler<EndGame, Unit> {
     override suspend fun handle(command: EndGame) {
-        //TODO: Foi recomendado pelo sonar de remover e adicionar uma nova instancia toda vez para evitar problema de performance
-        command.gameId
-        Games().games.find { it.id.toString() == command.gameId }?.let { game ->
-            game.players.find { it.name == command.playerName }?.let { player ->
-                if (player.isOwner())
-                    game.status = GameStatus.FINISHED
-                    Games().games.remove(game)
-                    Games().games.add(game)
+        val (gameId, playerName) = command
+        val gamesInstance = Games()
+        val game = gamesInstance.games.find { it.id.toString() == gameId }
+            ?: throw IllegalArgumentException("Game $gameId not found")
 
-                throw IllegalArgumentException("Player ${command.playerName} is not the owner of game ${command.gameId}")
-            } ?: throw IllegalArgumentException("Player ${command.playerName} not found in game ${command.gameId}")
-        } ?: throw IllegalArgumentException("Game ${command.gameId} not found")
+        val player = game.players.find { it.name == playerName }
+            ?: throw IllegalArgumentException("Player $playerName not found in game $gameId")
+
+        if (!player.isOwner()) {
+            game.status = GameStatus.FINISHED
+            throw IllegalArgumentException("Player $playerName is not the owner of game $gameId")
+        }
     }
 }
 //TODO:Melhorar chamada de exceptions, da para melhorar
