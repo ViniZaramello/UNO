@@ -14,6 +14,5 @@ class EndGameHandler(
 
         player.isOwner()
         game.status = FINISHED
-
     }
 }

@@ -1,7 +1,9 @@
 package com.example
 
 import com.example.application.handler.CreateGameHandler
+import com.example.application.handler.EndGameHandler
 import com.example.application.handler.JoinPlayerInGameHandler
+import com.example.application.handler.StartGameHandler
 import com.example.application.model.Games
 import com.example.configuration.configureFrameworks
 import com.example.configuration.configureHTTP
@@ -23,8 +25,10 @@ fun main() {
 
         val createGameHandler = CreateGameHandler(games)
         val joinPlayerInGameHandler = JoinPlayerInGameHandler(games)
+        val endGameHandler = EndGameHandler(games)
+        val startGameHandler = StartGameHandler(games)
 
-        gameEndpoint(createGameHandler, joinPlayerInGameHandler)
+        gameEndpoint(createGameHandler, joinPlayerInGameHandler, endGameHandler, startGameHandler)
     }.start(wait = true)
 }
 

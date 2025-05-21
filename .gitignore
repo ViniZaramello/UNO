@@ -34,3 +34,5 @@ out/
 
 ### VS Code ###
 .vscode/
+/.kotlin/errors/errors-1746650460427.log
+/.kotlin/errors/errors-1746650461185.log

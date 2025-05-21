@@ -13,6 +13,7 @@ class JoinPlayerInGameHandler(
         val gameInfo = games.findGameById(gameId)
 
         require(gameInfo.status == GameStatus.CREATED) { "Game $gameId is not available" }
+        require(gameInfo.verifyPlayerExists(playerInfo)) { "Player ${playerInfo.name} already exists in game $gameId" }
 
         playerInfo.number = gameInfo.playerNumber()
         gameInfo.players.add(playerInfo)

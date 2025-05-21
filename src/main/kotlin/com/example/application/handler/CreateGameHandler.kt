@@ -9,9 +9,7 @@ class CreateGameHandler(
     private val games: Games,
 ) : CommandHandler<CreateGame, String> {
     override suspend fun handle(command: CreateGame): String {
-        val game = Game(
-            players = mutableListOf(command.player),
-        )
+        val game = Game(players = mutableListOf(command.player))
 
         games.addGame(game)
 
