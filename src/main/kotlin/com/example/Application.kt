@@ -7,11 +7,12 @@ import com.example.application.handler.StartGameHandler
 import com.example.application.model.Games
 import com.example.configuration.configureFrameworks
 import com.example.configuration.configureHTTP
-import io.ktor.serialization.kotlinx.json.*
-import io.ktor.server.application.*
-import io.ktor.server.engine.*
-import io.ktor.server.netty.*
-import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.serialization.kotlinx.json.json
+import io.ktor.server.application.Application
+import io.ktor.server.application.install
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.netty.Netty
+import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import com.example.driver.http.endpointConfig as gameEndpoint
 
 fun main() {

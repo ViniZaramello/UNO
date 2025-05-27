@@ -1,0 +1,21 @@
+package com.example.application.handler
+
+import com.example.application.command.SkipPlayer
+import com.example.application.model.Games
+import com.example.application.ports.inbound.CommandHandler
+
+class SkipPlayerHandler(
+    private val games: Games
+) : CommandHandler<SkipPlayer, Unit> {
+    override suspend fun handle(command: SkipPlayer) {
+        val game = games.findGameById(command.gameId.toString())
+        val player = game.findPlayer(command.playerName)
+        val targetPlayer = game.findPlayer(command.targetPlayerName)
+
+        require(player.passphrase == command.passphrase) { "Invalid passphrase." }
+        player.isOwner()
+
+        val penaltyCards = game.stacks.getRandomCards(2)
+        targetPlayer.cards.addAll(penaltyCards)
+    }
+}

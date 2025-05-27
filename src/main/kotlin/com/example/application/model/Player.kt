@@ -1,5 +1,7 @@
 package com.example.application.model
 
+import java.util.UUID
+
 data class Player (
     val name: String,
     var number: Int = 1,
@@ -17,4 +19,9 @@ data class Player (
     fun isLastCard() = lastCard && cards.size == 1
 
     fun isOwner() = require(owner) { "Player $name is not the owner of game" }
+
+    fun getCardById(cardId: UUID) : Card {
+        return cards.find { it.id == cardId.toString() }
+            ?: throw IllegalArgumentException("Card with id $cardId not found in player's hand")
+    }
 }

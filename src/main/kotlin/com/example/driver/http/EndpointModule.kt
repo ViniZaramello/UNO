@@ -9,7 +9,7 @@ import com.example.driver.http.createGame.createGameRoute
 import com.example.driver.http.endGame.endGameRoute
 import com.example.driver.http.joinGame.joinGameRoute
 import com.example.driver.http.startGame.startGameRoute
-import io.ktor.server.application.*
+import io.ktor.server.application.Application
 
 fun Application.endpointConfig(
     createGame: CommandHandler<CreateGame, String>,

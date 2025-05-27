@@ -1,6 +1,8 @@
 package com.example.application.model.vo
 
 import com.example.application.model.Card
+import com.example.application.model.Colors.BLACK
+import com.example.application.model.Player
 import com.example.application.model.SpecialType.NONE
 import com.example.application.model.newCardDeck
 
@@ -54,5 +56,13 @@ class StackCards(
         cardList.add(lastCard)
     }
 
+    fun verifyParity(card: Card): Boolean {
+        val lastCard = cardsInTable.last()
+        return card.color == lastCard.color || card.number == lastCard.number || card.color == BLACK
+    }
 
+    fun throwCard(card: Card, player: Player) {
+        player.cards.remove(card)
+        cardsInTable.add(card)
+    }
 }
