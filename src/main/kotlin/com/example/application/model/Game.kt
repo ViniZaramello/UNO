@@ -15,6 +15,7 @@ data class Game(
     val stacks: StackCards = StackCards(),
     val firstCard: Card = stacks.cardsInTable.first(),
     var buyCardQuantity: Int = 0,
+    var reverse: Boolean = false
 ) {
 
     fun resetGame() {
@@ -38,7 +39,15 @@ data class Game(
     fun playerTurn(player: Player) = (playerTurn == player.number)
 
     fun passTurn() {
-        playerTurn = if (playerTurn < players.size) playerTurn + 1 else 0
+        playerTurn = when (reverse) {
+            true -> {
+                if (playerTurn < players.size) playerTurn - 1 else players.size
+            }
+
+            false -> {
+                if (playerTurn < players.size) playerTurn + 1 else 0
+            }
+        }
     }
 
     fun playerNumber(): Int {
@@ -75,29 +84,24 @@ data class Game(
         return cardNextPlayer != null
     }
 
-    fun blockPlayer(card: Card){
-        if(!verifyNextPlayerHaveBlockCard(card))
+    fun blockPlayer(card: Card) {
+        if (!verifyNextPlayerHaveBlockCard(card))
             passTurn()
     }
 
     fun purchasePlayer(card: Card) {
-        if(!verifyNextPlayerHavePurchaseCard())
-            when(card.number) {
+        if (!verifyNextPlayerHavePurchaseCard())
+            when (card.number) {
                 "plusTwo" -> buyCardQuantity += 2
                 "plusFour" -> buyCardQuantity += 4
             }
-            passTurn()
+        passTurn()
         val nextPlayer = findPlayerByTurn(playerTurn)
         nextPlayer.cards.addAll(stacks.getRandomCards(buyCardQuantity))
         buyCardQuantity = 0
     }
 
     fun reverseTurn() {
-        TODO("Pensar em uma lógica para reverter ordem de jogo")
-    }
-
-    fun changeColor(color: String?, card: Card) {
-        require(color != null) { "Use of the color change chart requires a color specification" }
-        TODO("Muda a cor")
+        TODO("Retornar true no reverse e pensar em passar o turno em todos os arranjos feitos")
     }
 }

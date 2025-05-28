@@ -7,7 +7,7 @@ import java.util.UUID
 data class Card(
     val id: String = UUID.randomUUID().toString(),
     val number: String,
-    val color: Colors,
+    var color: Colors,
     val especial: SpecialType,
     val name: String,
     val png: String? = null,
