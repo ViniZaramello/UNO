@@ -15,7 +15,8 @@ data class Game(
     val stacks: StackCards = StackCards(),
     val firstCard: Card = stacks.cardsInTable.first(),
     var buyCardQuantity: Int = 0,
-    var reverse: Boolean = false
+    var reverse: Boolean = false,
+    var blockPending: Boolean = false
 ) {
 
     fun resetGame() {
@@ -45,7 +46,7 @@ data class Game(
             }
 
             false -> {
-                if (playerTurn < players.size) playerTurn + 1 else 0
+                if (playerTurn < players.size) playerTurn + 1 else 1
             }
         }
     }
@@ -72,36 +73,49 @@ data class Game(
             ?: throw IllegalArgumentException("Player with turn $turn not found in game")
     }
 
-    fun verifyNextPlayerHaveBlockCard(card: Card): Boolean {
+    private fun verifyNextPlayerHaveBlockCard(card: Card): Boolean {
         val nextPlayer = findPlayerByTurn(playerTurn)
         val cardNextPlayer = nextPlayer.cards.find { it.name == card.name }
         return cardNextPlayer != null
     }
 
-    fun verifyNextPlayerHavePurchaseCard(): Boolean {
+    private fun verifyNextPlayerHavePurchaseCard(): Boolean {
         val nextPlayer = findPlayerByTurn(playerTurn)
         val cardNextPlayer = nextPlayer.cards.find { it.name == "plusTwo" || it.name == "plusFour" }
         return cardNextPlayer != null
     }
 
     fun blockPlayer(card: Card) {
-        if (!verifyNextPlayerHaveBlockCard(card))
+        if (!verifyNextPlayerHaveBlockCard(card)) {
             passTurn()
+            return
+        }
+        blockPending = true
     }
 
     fun purchasePlayer(card: Card) {
-        if (!verifyNextPlayerHavePurchaseCard())
+        if (!verifyNextPlayerHavePurchaseCard()) {
             when (card.number) {
                 "plusTwo" -> buyCardQuantity += 2
                 "plusFour" -> buyCardQuantity += 4
             }
-        passTurn()
+            return
+        }
         val nextPlayer = findPlayerByTurn(playerTurn)
         nextPlayer.cards.addAll(stacks.getRandomCards(buyCardQuantity))
         buyCardQuantity = 0
     }
 
     fun reverseTurn() {
-        TODO("Retornar true no reverse e pensar em passar o turno em todos os arranjos feitos")
+        if(reverse) {
+            reverse = false
+            return
+        }
+        reverse = true
+    }
+
+    fun discountPendingCard(player: Player){
+            player.cards.addAll(stacks.getRandomCards(buyCardQuantity))
+            buyCardQuantity = 0
     }
 }
