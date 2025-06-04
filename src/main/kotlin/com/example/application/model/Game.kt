@@ -11,7 +11,6 @@ data class Game(
     val playerLimit: PlayerLimit = PlayerLimit(),
     val players: MutableList<Player> = mutableListOf(),
     var playerTurn: Int = 1,
-    var leader: List<Player> = listOf(),
     val stacks: StackCards = StackCards(),
     val firstCard: Card = stacks.cardsInTable.first(),
     var buyCardQuantity: Int = 0,
@@ -68,7 +67,7 @@ data class Game(
         return player
     }
 
-    private fun findPlayerByTurn(turn: Int): Player {
+    fun findPlayerByTurn(turn: Int): Player {
         return players.find { it.number == turn }
             ?: throw IllegalArgumentException("Player with turn $turn not found in game")
     }

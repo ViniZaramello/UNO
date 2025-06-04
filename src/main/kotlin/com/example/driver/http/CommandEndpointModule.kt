@@ -11,7 +11,7 @@ import com.example.driver.http.joinGame.joinGameRoute
 import com.example.driver.http.startGame.startGameRoute
 import io.ktor.server.application.Application
 
-fun Application.endpointConfig(
+fun Application.commandEndpointConfig(
     createGame: CommandHandler<CreateGame, String>,
     joinPlayerInGame: CommandHandler<JoinPlayerInGame, Unit>,
     endGame: CommandHandler<EndGame, Unit>,
