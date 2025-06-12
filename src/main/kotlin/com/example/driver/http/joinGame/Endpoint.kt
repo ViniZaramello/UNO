@@ -1,12 +1,18 @@
 package com.example.driver.http.joinGame
 
+import MyMessages.require_player_name
+import MyMessages.require_game_id
+import MyMessages.require_player_passphrase
 import com.example.application.command.JoinPlayerInGame
 import com.example.application.ports.inbound.CommandHandler
-import io.ktor.http.*
-import io.ktor.server.application.*
-import io.ktor.server.request.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.Application
+import io.ktor.server.request.receive
+import io.ktor.server.response.respond
+import io.ktor.server.response.respondText
+import io.ktor.server.routing.post
+import io.ktor.server.routing.route
+import io.ktor.server.routing.routing
 
 
 class Endpoint(
@@ -40,13 +46,13 @@ fun Application.joinGameRoute(handler: CommandHandler<JoinPlayerInGame, Unit>) {
 fun validateRequest(request: Request): MutableList<String> {
     val errorList: MutableList<String> = mutableListOf()
     if (request.name.isBlank())
-        errorList.add("Name is required")
+        errorList.add(require_player_name.toString())
 
     if (request.passphrase.isBlank())
-        errorList.add("Passphrase is required")
+        errorList.add(require_player_passphrase.toString())
 
     if (request.gameId.isBlank())
-        errorList.add("gameId is required")
+        errorList.add(require_game_id.toString())
 
     return errorList
 }

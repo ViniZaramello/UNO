@@ -1,5 +1,8 @@
 package com.example.application.handler
 
+import MyMessages.game_in_progress
+import MyMessages.min_player_requirement
+import MyMessages.passphrase_invalid
 import com.example.application.command.StartGame
 import com.example.application.model.GameStatus.FINISHED
 import com.example.application.model.GameStatus.PLAYING
@@ -15,13 +18,15 @@ class StartGameHandler(
         val player = game.findPlayer(command.playerName)
 
         when (game.status) {
-            PLAYING -> throw IllegalStateException("Game is already in progress.")
+            PLAYING -> throw IllegalStateException(game_in_progress.toString())
             FINISHED -> game.resetGame()
             else -> game.status = WAITING
         }
 
+        require(player.passphrase == command.passphrase) { passphrase_invalid }
+
         player.isOwner()
-        require(game.players.size > 1) { "At least 2 players are required for the game to start." }
+        require(game.players.size > 1) { min_player_requirement }
         game.initialCards()
         game.status = PLAYING
     }

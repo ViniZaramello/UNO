@@ -1,5 +1,7 @@
 package com.example.application.model
 
+import MyMessages.game_not_found
+
 data class Games(val games: MutableList<Game> = mutableListOf()) {
     fun addGame(game: Game) {
         games.add(game)
@@ -11,6 +13,6 @@ data class Games(val games: MutableList<Game> = mutableListOf()) {
 
     fun findGameById(id: String): Game {
         return games.find { it.id.toString() == id }
-            ?: throw IllegalArgumentException("Game $id not found")
+            ?: throw IllegalArgumentException(game_not_found(id))
     }
 }

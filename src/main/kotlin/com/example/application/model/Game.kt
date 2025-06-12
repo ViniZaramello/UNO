@@ -1,8 +1,11 @@
 package com.example.application.model
 
+import MyMessages.player_limit_exceded
+import MyMessages.player_not_found
+import MyMessages.player_turn_not_found
 import com.example.application.model.vo.PlayerLimit
 import com.example.application.model.vo.StackCards
-import java.util.UUID
+import java.util.*
 
 data class Game(
     val id: UUID = UUID.randomUUID(),
@@ -51,25 +54,26 @@ data class Game(
     }
 
     fun playerNumber(): Int {
-        check(players.size < playerLimit.playerLimit) { "Player limit exceeded for $playerLimit" }
+        check(players.size < playerLimit.playerLimit) { player_limit_exceded }
         return players.size + 1
     }
 
     fun verifyPlayerExists(player: Player): Boolean {
         val playerInGame = players.find { it.name == player.name }
-        require(playerInGame != null) { throw IllegalArgumentException("Player ${player.name} already exists in game") }
+        require(playerInGame != null) { return false }
         return true
     }
 
     fun findPlayer(playerName: String): Player {
         val player = players.find { it.name == playerName }
-            ?: throw IllegalArgumentException("Player $playerName not found in game")
+            ?: throw IllegalArgumentException(player_not_found(playerName))
         return player
     }
 
+    //TODO: Criar um log de WARN caso essa exception ocorra
     fun findPlayerByTurn(turn: Int): Player {
         return players.find { it.number == turn }
-            ?: throw IllegalArgumentException("Player with turn $turn not found in game")
+            ?: throw IllegalArgumentException(player_turn_not_found(turn))
     }
 
     private fun verifyNextPlayerHaveBlockCard(card: Card): Boolean {
@@ -102,19 +106,20 @@ data class Game(
         }
         val nextPlayer = findPlayerByTurn(playerTurn)
         nextPlayer.cards.addAll(stacks.getRandomCards(buyCardQuantity))
+        nextPlayer.lastCard = false
         buyCardQuantity = 0
     }
 
     fun reverseTurn() {
-        if(reverse) {
+        if (reverse) {
             reverse = false
             return
         }
         reverse = true
     }
 
-    fun discountPendingCard(player: Player){
-            player.cards.addAll(stacks.getRandomCards(buyCardQuantity))
-            buyCardQuantity = 0
+    fun discountPendingCard(player: Player) {
+        player.cards.addAll(stacks.getRandomCards(buyCardQuantity))
+        buyCardQuantity = 0
     }
 }

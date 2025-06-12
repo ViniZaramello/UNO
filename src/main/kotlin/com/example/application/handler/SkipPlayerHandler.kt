@@ -1,5 +1,6 @@
 package com.example.application.handler
 
+import MyMessages.passphrase_invalid
 import com.example.application.command.SkipPlayer
 import com.example.application.model.Games
 import com.example.application.ports.inbound.CommandHandler
@@ -12,7 +13,7 @@ class SkipPlayerHandler(
         val player = game.findPlayer(command.playerName)
         val targetPlayer = game.findPlayer(command.targetPlayerName)
 
-        require(player.passphrase == command.passphrase) { "Invalid passphrase." }
+        require(player.passphrase == command.passphrase) { passphrase_invalid }
         player.isOwner()
 
         val penaltyCards = game.stacks.getRandomCards(2)

@@ -1,5 +1,8 @@
 package com.example.driver.http.startGame
 
+import MyMessages.require_game_id
+import MyMessages.require_player_name
+import MyMessages.require_player_passphrase
 import com.example.application.command.StartGame
 import com.example.application.ports.inbound.CommandHandler
 import io.ktor.http.HttpStatusCode
@@ -33,8 +36,8 @@ fun Application.startGameRoute(handler: CommandHandler<StartGame, Unit>) {
                         errorList.joinToString(", "),
                         status = HttpStatusCode.BadRequest
                     )
-                val gameId = Endpoint(handler).command(command)
-                call.respond(HttpStatusCode.Created,"Room identifier code: $gameId" )
+                Endpoint(handler).command(command)
+                call.respond(HttpStatusCode.NoContent)
             }
         }
     }
@@ -43,10 +46,13 @@ fun Application.startGameRoute(handler: CommandHandler<StartGame, Unit>) {
 fun validateRequest(request: Request): MutableList<String> {
     val errorList: MutableList<String> = mutableListOf()
     if (request.gameId.isBlank())
-        errorList.add("Game ID is required")
+        errorList.add(require_game_id.toString())
 
     if (request.playerName.isBlank())
-        errorList.add("Name is required")
+        errorList.add(require_player_name.toString())
+
+    if (request.passphrase.isBlank())
+        errorList.add(require_player_passphrase.toString())
 
     return errorList
 }

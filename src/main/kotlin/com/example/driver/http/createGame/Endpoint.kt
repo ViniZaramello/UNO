@@ -1,12 +1,18 @@
 package com.example.driver.http.createGame
 
+import MyMessages.game_info_id
+import MyMessages.require_player_name
+import MyMessages.require_player_passphrase
 import com.example.application.command.CreateGame
 import com.example.application.ports.inbound.CommandHandler
-import io.ktor.http.*
-import io.ktor.server.application.*
-import io.ktor.server.request.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.Application
+import io.ktor.server.request.receive
+import io.ktor.server.response.respond
+import io.ktor.server.response.respondText
+import io.ktor.server.routing.post
+import io.ktor.server.routing.route
+import io.ktor.server.routing.routing
 
 class Endpoint(
     private val handler: CommandHandler<CreateGame, String>
@@ -31,7 +37,7 @@ fun Application.createGameRoute(handler: CommandHandler<CreateGame, String>) {
                         status = HttpStatusCode.BadRequest
                     )
                 val gameId = Endpoint(handler).command(command)
-                call.respond(HttpStatusCode.Created,"Room identifier code: $gameId" )
+                call.respond(HttpStatusCode.Created, game_info_id(gameId))
             }
         }
     }
@@ -40,10 +46,10 @@ fun Application.createGameRoute(handler: CommandHandler<CreateGame, String>) {
 fun validateRequest(request: Request): MutableList<String> {
     val errorList: MutableList<String> = mutableListOf()
     if (request.name.isBlank())
-        errorList.add("Name is required")
+        errorList.add(require_player_name.toString())
 
     if (request.passphrase.isBlank())
-        errorList.add("Passphrase is required")
+        errorList.add(require_player_passphrase.toString())
 
     return errorList
 }

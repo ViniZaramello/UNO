@@ -6,12 +6,14 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Request(
     val gameId: String,
-    val playerName: String
+    val playerName: String,
+    val passphrase: String
 ) {
     fun toCommand(): StartGame {
         return StartGame(
-            gameId = gameId,
-            playerName = playerName
+            gameId = gameId.trim(),
+            playerName = playerName.trim(),
+            passphrase = passphrase.trim()
         )
     }
 }

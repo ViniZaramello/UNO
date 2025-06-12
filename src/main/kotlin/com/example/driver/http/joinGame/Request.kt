@@ -1,6 +1,5 @@
 package com.example.driver.http.joinGame
 
-import com.example.application.command.CreateGame
 import com.example.application.command.JoinPlayerInGame
 import com.example.application.model.Player
 import kotlinx.serialization.Serializable
@@ -15,7 +14,6 @@ data class Request(
         val player = Player(
             name = name.trim(),
             passphrase = passphrase.trim(),
-            owner = true,
         )
         return JoinPlayerInGame(player = player, gameId = gameId)
     }

@@ -1,5 +1,6 @@
 package com.example.query.cards.by.gameIdplayer
 
+import MyMessages.passphrase_invalid
 import com.example.application.model.Card
 import com.example.application.model.Games
 
@@ -10,7 +11,7 @@ class Dao(
         val game = games.findGameById(gameId)
         val player = game.findPlayer(playerName)
 
-        require(player.passphrase == passphrase) { "Passphrase incorrect" }
+        require(player.passphrase == passphrase) { passphrase_invalid }
 
         return player.cards
     }

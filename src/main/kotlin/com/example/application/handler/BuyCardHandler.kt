@@ -1,5 +1,7 @@
 package com.example.application.handler
 
+import MyMessages.its_not_your_turn_to_buy
+import MyMessages.passphrase_invalid
 import com.example.application.command.BuyCard
 import com.example.application.model.Card
 import com.example.application.model.Games
@@ -12,8 +14,8 @@ class BuyCardHandler(
         val game = games.findGameById(command.gameId.toString())
         val player = game.findPlayer(command.playerName)
 
-        require(player.passphrase == command.passphrase) { "Invalid passphrase." }
-        require(game.playerTurn(player)) { "It's not your turn to buy a card."}
+        require(player.passphrase == command.passphrase) { passphrase_invalid }
+        require(game.playerTurn(player)) { its_not_your_turn_to_buy }
 
         val card = game.stacks.getRandomCard()
         player.cards.add(card)

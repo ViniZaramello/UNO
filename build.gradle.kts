@@ -3,11 +3,13 @@ val kotlin_version: String by project
 val logback_version: String by project
 val graphql_version: String by project
 val exposed_database: String by project
+val i18n_version: String by project
 
 plugins {
     kotlin("jvm") version "2.1.0"
     id("io.ktor.plugin") version "3.0.2"
     id("org.jetbrains.kotlin.plugin.serialization") version "2.1.0"
+    id("de.comahe.i18n4k") version "0.10.0"
 }
 
 group = "com.example"
@@ -22,6 +24,7 @@ application {
 
 repositories {
     mavenCentral()
+    maven ("https://jitpack.io")
 }
 
 dependencies {
@@ -48,5 +51,8 @@ dependencies {
 
     //GraphQL
     implementation("com.expediagroup:graphql-kotlin-server:$graphql_version")
+
+    //i18n
+    implementation("de.comahe.i18n4k:i18n4k-core-jvm:$i18n_version")
 
 }
