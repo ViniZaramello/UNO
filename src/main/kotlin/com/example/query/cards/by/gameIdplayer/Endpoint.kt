@@ -1,5 +1,8 @@
 package com.example.query.cards.by.gameIdplayer
 
+import MyMessages.require_game_id
+import MyMessages.require_player_name
+import MyMessages.require_player_passphrase
 import com.example.application.model.Card
 import com.example.application.model.Games
 import io.ktor.http.HttpStatusCode
@@ -19,13 +22,13 @@ class Endpoint(
 fun Application.getPlayerHandCards(games: Games) {
     routing {
         get("/query/{gameId}/{playerName}/{passphrase}/cards") {
-            val gameId= call.parameters["gameId"]?.trim()
+            val gameId = call.parameters["gameId"]?.trim()
             val playerName = call.parameters["playerName"]?.trim()
             val passphrase = call.parameters["passphrase"]?.trim()
 
-            require(gameId != null) { "Game ID is required." }
-            require(playerName != null) { "Player Name is required." }
-            require(passphrase != null) { "Passphrase is required." }
+            require(gameId != null) { require_game_id }
+            require(playerName != null) { require_player_name }
+            require(passphrase != null) { require_player_passphrase }
 
             val cards = Endpoint(Dao(games)).query(gameId, playerName, passphrase)
 

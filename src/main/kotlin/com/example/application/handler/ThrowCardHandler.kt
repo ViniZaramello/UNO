@@ -44,6 +44,7 @@ class ThrowCardHandler(
                 require(color != null) { "Use of the color change chart requires a color specification" }
                 card.color = Colors.valueOf(color)
             }
+
             "reverse" -> game.reverseTurn()
             "plusTwo", "plusFour" -> game.purchasePlayer(card)
         }

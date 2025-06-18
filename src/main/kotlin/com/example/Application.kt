@@ -2,8 +2,10 @@ package com.example
 
 import com.example.application.handler.CreateGameHandler
 import com.example.application.handler.EndGameHandler
+import com.example.application.handler.FlagLastCardHandler
 import com.example.application.handler.JoinPlayerInGameHandler
 import com.example.application.handler.StartGameHandler
+import com.example.application.handler.ThrowCardHandler
 import com.example.application.model.Games
 import com.example.configuration.configureFrameworks
 import com.example.configuration.configureHTTP
@@ -29,8 +31,17 @@ fun main() {
         val joinPlayerInGameHandler = JoinPlayerInGameHandler(games)
         val endGameHandler = EndGameHandler(games)
         val startGameHandler = StartGameHandler(games)
+        val flagLastCardHandler = FlagLastCardHandler(games)
+        val throwCardHandler = ThrowCardHandler(games)
 
-        commandEndpointConfig(createGameHandler, joinPlayerInGameHandler, endGameHandler, startGameHandler)
+        commandEndpointConfig(
+            createGameHandler,
+            joinPlayerInGameHandler,
+            endGameHandler,
+            startGameHandler,
+            flagLastCardHandler,
+            throwCardHandler
+        )
         queryEndpointConfig(games)
     }.start(wait = true)
 }

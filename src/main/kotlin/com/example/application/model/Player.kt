@@ -7,7 +7,7 @@ import java.util.UUID
 data class Player(
     val name: String,
     var number: Int = 1,
-    val lastCardPlayed: Card? = null,
+    var lastCardPlayed: Card? = null,
     var lastCard: Boolean = false,
     val passphrase: String,
     val owner: Boolean = false,

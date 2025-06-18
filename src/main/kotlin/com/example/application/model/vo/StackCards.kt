@@ -25,7 +25,7 @@ class StackCards(
         return card
     }
 
-    fun getFirstCard(): Card{
+    fun getFirstCard(): Card {
         val card = cardsInDeck.random()
         if (card.especial != NONE) {
             getFirstCard()
@@ -63,6 +63,7 @@ class StackCards(
 
     fun throwCard(card: Card, player: Player) {
         player.cards.remove(card)
+        player.lastCardPlayed = card
         cardsInTable.add(card)
     }
 }
