@@ -13,6 +13,9 @@ class SkipPlayerHandler(
         val player = game.findPlayer(command.playerName)
         val targetPlayer = game.findPlayer(command.targetPlayerName)
 
+        //TODO: Verificar logica, não está validando o turno do jogador, só está aplicando a penalidade
+        require(game.playerTurn(targetPlayer)) { }
+
         require(player.passphrase == command.passphrase) { passphrase_invalid }
         player.isOwner()
 
