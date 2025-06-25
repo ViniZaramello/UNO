@@ -1,6 +1,7 @@
 package com.example.application.handler
 
 import MyMessages.passphrase_invalid
+import MyMessages.require_target_player_is_not_turn
 import com.example.application.command.SkipPlayer
 import com.example.application.model.Games
 import com.example.application.ports.inbound.CommandHandler
@@ -13,8 +14,7 @@ class SkipPlayerHandler(
         val player = game.findPlayer(command.playerName)
         val targetPlayer = game.findPlayer(command.targetPlayerName)
 
-        //TODO: Verificar logica, não está validando o turno do jogador, só está aplicando a penalidade
-        require(game.playerTurn(targetPlayer)) { }
+        require(game.playerTurn(targetPlayer)) { require_target_player_is_not_turn }
 
         require(player.passphrase == command.passphrase) { passphrase_invalid }
         player.isOwner()

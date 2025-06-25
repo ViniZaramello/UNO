@@ -18,14 +18,14 @@ import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 
 class Endpoint(
-    private val handler: CommandHandler<SkipPlayer, String>
+    private val handler: CommandHandler<SkipPlayer, Unit>
 ) {
-    suspend fun command(request: SkipPlayer): String {
-        return handler.handle(request)
+    suspend fun command(request: SkipPlayer) {
+        handler.handle(request)
     }
 }
 
-fun Application.createGameRoute(handler: CommandHandler<SkipPlayer, String>) {
+fun Application.skipPlayerRoute(handler: CommandHandler<SkipPlayer, Unit>) {
 
     routing {
         route("/game") {

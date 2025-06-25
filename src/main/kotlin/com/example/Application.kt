@@ -1,9 +1,11 @@
 package com.example
 
+import com.example.application.handler.BuyCardHandler
 import com.example.application.handler.CreateGameHandler
 import com.example.application.handler.EndGameHandler
 import com.example.application.handler.FlagLastCardHandler
 import com.example.application.handler.JoinPlayerInGameHandler
+import com.example.application.handler.SkipPlayerHandler
 import com.example.application.handler.StartGameHandler
 import com.example.application.handler.ThrowCardHandler
 import com.example.application.model.Games
@@ -33,14 +35,18 @@ fun main() {
         val startGameHandler = StartGameHandler(games)
         val flagLastCardHandler = FlagLastCardHandler(games)
         val throwCardHandler = ThrowCardHandler(games)
+        val skipPlayerHandler = SkipPlayerHandler(games)
+        val buyCardHandler = BuyCardHandler(games)
 
         commandEndpointConfig(
-            createGameHandler,
-            joinPlayerInGameHandler,
-            endGameHandler,
-            startGameHandler,
-            flagLastCardHandler,
-            throwCardHandler
+            createGame = createGameHandler,
+            joinPlayerInGame = joinPlayerInGameHandler,
+            endGame = endGameHandler,
+            startGame = startGameHandler,
+            flagLastCard = flagLastCardHandler,
+            throwCard = throwCardHandler,
+            skipPlayer = skipPlayerHandler,
+            buyCard = buyCardHandler
         )
         queryEndpointConfig(games)
     }.start(wait = true)
