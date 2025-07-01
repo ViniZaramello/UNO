@@ -5,6 +5,8 @@ import com.example.application.handler.CreateGameHandler
 import com.example.application.handler.EndGameHandler
 import com.example.application.handler.FlagLastCardHandler
 import com.example.application.handler.JoinPlayerInGameHandler
+import com.example.application.handler.KickPlayerHandle
+import com.example.application.handler.QuitGameHandler
 import com.example.application.handler.SkipPlayerHandler
 import com.example.application.handler.StartGameHandler
 import com.example.application.handler.ThrowCardHandler
@@ -37,6 +39,8 @@ fun main() {
         val throwCardHandler = ThrowCardHandler(games)
         val skipPlayerHandler = SkipPlayerHandler(games)
         val buyCardHandler = BuyCardHandler(games)
+        val kickPlayer = KickPlayerHandle(games)
+        val quitGame = QuitGameHandler(games)
 
         commandEndpointConfig(
             createGame = createGameHandler,
@@ -46,7 +50,9 @@ fun main() {
             flagLastCard = flagLastCardHandler,
             throwCard = throwCardHandler,
             skipPlayer = skipPlayerHandler,
-            buyCard = buyCardHandler
+            buyCard = buyCardHandler,
+            kickPlayer = kickPlayer,
+            quitGame = quitGame
         )
         queryEndpointConfig(games)
     }.start(wait = true)

@@ -5,7 +5,6 @@ import MyMessages.require_game_id
 import MyMessages.require_player_name
 import MyMessages.require_player_passphrase
 import MyMessages.require_target_player_not_found
-import com.example.application.command.CreateGame
 import com.example.application.command.SkipPlayer
 import com.example.application.ports.inbound.CommandHandler
 import io.ktor.http.HttpStatusCode

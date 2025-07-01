@@ -1,9 +1,11 @@
-package com.example.driver.http.joinGame
+package com.example.driver.http.kickPlayer
 
-import MyMessages.require_player_name
+import MyMessages.game_info_id
 import MyMessages.require_game_id
+import MyMessages.require_player_name
 import MyMessages.require_player_passphrase
-import com.example.application.command.JoinPlayerInGame
+import MyMessages.require_target_player_not_found
+import com.example.application.command.KickPlayer
 import com.example.application.ports.inbound.CommandHandler
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
@@ -15,18 +17,19 @@ import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 
 class Endpoint(
-    private val handler: CommandHandler<JoinPlayerInGame, Unit>
+    private val handler: CommandHandler<KickPlayer, Unit>
 ) {
-    suspend fun command(request: JoinPlayerInGame) {
+    suspend fun command(request: KickPlayer) {
         handler.handle(request)
     }
 }
 
-fun Application.joinGameRoute(handler: CommandHandler<JoinPlayerInGame, Unit>) {
+fun Application.kickPlayerRoute(handler: CommandHandler<KickPlayer, Unit>) {
 
     routing {
         route("/game") {
-            post("/joinGame") {
+            post("/kickPlayer") {
+
                 val request = call.receive<Request>()
                 val command = request.toCommand()
                 val errorList: List<String> = validateRequest(request)
@@ -35,8 +38,8 @@ fun Application.joinGameRoute(handler: CommandHandler<JoinPlayerInGame, Unit>) {
                         errorList.joinToString(", "),
                         status = HttpStatusCode.BadRequest
                     )
-                Endpoint(handler).command(command)
-                call.respond(HttpStatusCode.NoContent)
+                val gameId = Endpoint(handler).command(command)
+                call.respond(HttpStatusCode.Created, game_info_id(gameId))
             }
         }
     }
@@ -44,14 +47,19 @@ fun Application.joinGameRoute(handler: CommandHandler<JoinPlayerInGame, Unit>) {
 
 fun validateRequest(request: Request): MutableList<String> {
     val errorList: MutableList<String> = mutableListOf()
-    if (request.name.isBlank())
+
+    if (request.gameId.isBlank())
+        errorList.add(require_game_id.toString())
+
+    if (request.playerName.isBlank())
         errorList.add(require_player_name.toString())
 
     if (request.passphrase.isBlank())
         errorList.add(require_player_passphrase.toString())
 
-    if (request.gameId.isBlank())
-        errorList.add(require_game_id.toString())
+
+    if (request.targetPlayerName.isBlank())
+        errorList.add(require_target_player_not_found.toString())
 
     return errorList
 }

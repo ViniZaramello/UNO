@@ -5,7 +5,7 @@ import MyMessages.player_not_found
 import MyMessages.player_turn_not_found
 import com.example.application.model.vo.PlayerLimit
 import com.example.application.model.vo.StackCards
-import java.util.*
+import java.util.UUID
 
 data class Game(
     val id: UUID = UUID.randomUUID(),
@@ -30,6 +30,7 @@ data class Game(
             player.resetCards()
             player.lastCard = false
             player.statusInGame = PlayerStatus.IN_LOBBY
+            this.status = GameStatus.WAITING
         }
     }
 
@@ -122,4 +123,12 @@ data class Game(
         player.cards.addAll(stacks.getRandomCards(buyCardQuantity))
         buyCardQuantity = 0
     }
+
+    fun changePlayerStatus(status: PlayerStatus) {
+        players.forEach { player ->
+            player.statusInGame = status
+        }
+    }
+
+    fun removePlayer(player: Player) = players.remove(player)
 }

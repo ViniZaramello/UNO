@@ -37,7 +37,7 @@ fun Application.createGameRoute(handler: CommandHandler<CreateGame, String>) {
                         status = HttpStatusCode.BadRequest
                     )
                 val gameId = Endpoint(handler).command(command)
-                call.respond(HttpStatusCode.Created, game_info_id(gameId))
+                call.respond(HttpStatusCode.Created, Response(gameId))
             }
         }
     }

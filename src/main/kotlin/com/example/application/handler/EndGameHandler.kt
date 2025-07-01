@@ -4,6 +4,7 @@ import MyMessages.passphrase_invalid
 import com.example.application.command.EndGame
 import com.example.application.model.GameStatus.FINISHED
 import com.example.application.model.Games
+import com.example.application.model.PlayerStatus
 import com.example.application.ports.inbound.CommandHandler
 
 class EndGameHandler(
@@ -17,5 +18,6 @@ class EndGameHandler(
 
         player.isOwner()
         game.status = FINISHED
+        game.changePlayerStatus(PlayerStatus.FINISHED)
     }
 }

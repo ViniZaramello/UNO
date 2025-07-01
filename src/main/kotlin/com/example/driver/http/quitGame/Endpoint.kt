@@ -1,9 +1,9 @@
-package com.example.driver.http.joinGame
+package com.example.driver.http.quitGame
 
-import MyMessages.require_player_name
 import MyMessages.require_game_id
+import MyMessages.require_player_name
 import MyMessages.require_player_passphrase
-import com.example.application.command.JoinPlayerInGame
+import com.example.application.command.QuitGame
 import com.example.application.ports.inbound.CommandHandler
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
@@ -15,18 +15,18 @@ import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 
 class Endpoint(
-    private val handler: CommandHandler<JoinPlayerInGame, Unit>
+    private val handler: CommandHandler<QuitGame, Unit>
 ) {
-    suspend fun command(request: JoinPlayerInGame) {
+    suspend fun command(request: QuitGame) {
         handler.handle(request)
     }
 }
 
-fun Application.joinGameRoute(handler: CommandHandler<JoinPlayerInGame, Unit>) {
+fun Application.quitGameRoute(handler: CommandHandler<QuitGame, Unit>) {
 
     routing {
         route("/game") {
-            post("/joinGame") {
+            post("/quitGame") {
                 val request = call.receive<Request>()
                 val command = request.toCommand()
                 val errorList: List<String> = validateRequest(request)

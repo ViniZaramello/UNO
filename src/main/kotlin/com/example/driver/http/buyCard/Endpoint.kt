@@ -55,6 +55,5 @@ fun validateRequest(request: Request): MutableList<String> {
     if (request.passphrase.isBlank())
         errorList.add(require_player_passphrase.toString())
 
-
     return errorList
 }
