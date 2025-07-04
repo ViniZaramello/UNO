@@ -15,8 +15,8 @@ fun Application.configureExceptionHandling() {
         exception<BadRequestException> { call, cause ->
             call.respond(HttpStatusCode.BadRequest, mapOf("message" to cause.message))
         }
-        exception<Throwable> { call, cause ->
-            call.respond(HttpStatusCode.InternalServerError, mapOf("message" to (cause.message ?:"An unexpected error occurred")))
+        exception<Throwable> { call, _ ->
+            call.respond(HttpStatusCode.InternalServerError, mapOf("message" to "An unexpected error occurred"))
         }
     }
 }
