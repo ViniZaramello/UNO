@@ -1,6 +1,6 @@
 package com.example.application.model
 
-import MyMessages.player_limit_exceded
+import MyMessages.player_limit_exceeded
 import MyMessages.player_not_found
 import MyMessages.player_turn_not_found
 import com.example.application.model.vo.PlayerLimit
@@ -55,7 +55,7 @@ data class Game(
     }
 
     fun playerNumber(): Int {
-        check(players.size < playerLimit.playerLimit) { player_limit_exceded }
+        check(players.size < playerLimit.playerLimit) { player_limit_exceeded }
         return players.size + 1
     }
 

@@ -13,7 +13,7 @@ class ThrowCardHandler(
 ) : CommandHandler<ThrowCard, Unit> {
     override suspend fun handle(command: ThrowCard) {
         val (gameId, playerName, passphrase, cardId, color) = command
-        val game = games.findGameById(gameId.toString())
+        val game = games.findGameById(gameId)
         val player = game.findPlayer(playerName)
 
         require(player.passphrase == passphrase) { "Invalid passphrase." }

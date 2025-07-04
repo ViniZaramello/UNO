@@ -11,7 +11,7 @@ class BuyCardHandler(
     private val games: Games,
 ) : CommandHandler<BuyCard, Card> {
     override suspend fun handle(command: BuyCard): Card {
-        val game = games.findGameById(command.gameId.toString())
+        val game = games.findGameById(command.gameId)
         val player = game.findPlayer(command.playerName)
 
         require(player.passphrase == command.passphrase) { passphrase_invalid }

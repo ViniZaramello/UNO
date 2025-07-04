@@ -10,7 +10,7 @@ class SkipPlayerHandler(
     private val games: Games
 ) : CommandHandler<SkipPlayer, Unit> {
     override suspend fun handle(command: SkipPlayer) {
-        val game = games.findGameById(command.gameId.toString())
+        val game = games.findGameById(command.gameId)
         val player = game.findPlayer(command.playerName)
         val targetPlayer = game.findPlayer(command.targetPlayerName)
 

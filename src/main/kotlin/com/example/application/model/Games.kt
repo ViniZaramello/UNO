@@ -1,6 +1,7 @@
 package com.example.application.model
 
 import MyMessages.game_not_found
+import java.util.UUID
 
 data class Games(val games: MutableList<Game> = mutableListOf()) {
     fun addGame(game: Game) {
@@ -11,8 +12,8 @@ data class Games(val games: MutableList<Game> = mutableListOf()) {
         games.remove(game)
     }
 
-    fun findGameById(id: String): Game {
-        return games.find { it.id.toString() == id }
+    fun findGameById(id: UUID): Game {
+        return games.find { it.id == id }
             ?: throw IllegalArgumentException(game_not_found(id))
     }
 }

@@ -11,7 +11,7 @@ class FlagLastCardHandler(
     private val games: Games
 ) : CommandHandler<FlagLastCard, Unit> {
     override suspend fun handle(command: FlagLastCard) {
-        val game = games.findGameById(command.gameId.toString())
+        val game = games.findGameById(command.gameId)
         val player = game.findPlayer(command.playerName)
 
         require(player.passphrase == command.passphrase) { passphrase_invalid }

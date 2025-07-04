@@ -9,7 +9,7 @@ class KickPlayerHandle(
     private val games: Games,
 ) : CommandHandler<KickPlayer, Unit> {
     override suspend fun handle(command: KickPlayer) {
-        val game = games.findGameById(command.gameId.toString())
+        val game = games.findGameById(command.gameId)
         val player = game.findPlayer(command.playerName)
 
         require(player.passphrase == command.passphrase) { passphrase_invalid }

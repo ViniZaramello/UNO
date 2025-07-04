@@ -55,4 +55,9 @@ dependencies {
     //i18n
     implementation("de.comahe.i18n4k:i18n4k-core-jvm:$i18n_version")
 
+    implementation("io.ktor:ktor-server-status-pages:3.0.2")
+
 }
+
+//implementation("io.ktor:ktor-server-core:3.0.2")
+//implementation("io.ktor:ktor-server-host-common:3.0.2")

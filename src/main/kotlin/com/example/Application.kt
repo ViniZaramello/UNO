@@ -11,19 +11,24 @@ import com.example.application.handler.SkipPlayerHandler
 import com.example.application.handler.StartGameHandler
 import com.example.application.handler.ThrowCardHandler
 import com.example.application.model.Games
+import com.example.configuration.configureExceptionHandling
 import com.example.configuration.configureFrameworks
 import com.example.configuration.configureHTTP
 import com.example.driver.http.commandEndpointConfig
 import com.example.query.queryEndpointConfig
+import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.plugins.statuspages.StatusPages
+import io.ktor.server.response.respondText
 
 fun main() {
     embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
+        configureExceptionHandling()
         configureFrameworks()
         configureHTTP()
         configureSerialization()
