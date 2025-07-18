@@ -7,5 +7,5 @@ import io.ktor.server.application.Application
 
 fun Application.queryEndpointConfig(games: Games){
     getPlayerHandCards(games)
-    getGameStats(games)
+    getGameStats()
 }

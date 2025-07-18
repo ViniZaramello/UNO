@@ -4,6 +4,7 @@ val logback_version: String by project
 val graphql_version: String by project
 val exposed_database: String by project
 val i18n_version: String by project
+val restAssured_version: String by project
 
 plugins {
     kotlin("jvm") version "2.1.0"
@@ -27,6 +28,10 @@ repositories {
     maven ("https://jitpack.io")
 }
 
+tasks.test {
+    useJUnitPlatform()
+}
+
 dependencies {
 
     //Koin
@@ -43,6 +48,8 @@ dependencies {
     implementation("io.ktor:ktor-server-config-yaml-jvm")
     testImplementation("io.ktor:ktor-server-test-host-jvm")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
+    testImplementation("io.rest-assured:rest-assured:$restAssured_version")
 
     //Database
     implementation("org.jetbrains.exposed:exposed-core:$exposed_database")

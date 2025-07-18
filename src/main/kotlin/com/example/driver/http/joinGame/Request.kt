@@ -2,6 +2,7 @@ package com.example.driver.http.joinGame
 
 import com.example.application.command.JoinPlayerInGame
 import com.example.application.model.Player
+import java.util.UUID
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -15,6 +16,6 @@ data class Request(
             name = name.trim(),
             passphrase = passphrase.trim(),
         )
-        return JoinPlayerInGame(player = player, gameId = gameId)
+        return JoinPlayerInGame(player = player, gameId = UUID.fromString(gameId.trim()))
     }
 }

@@ -10,11 +10,12 @@ import io.ktor.server.application.Application
 import io.ktor.server.response.respond
 import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
+import java.util.UUID
 
 class Endpoint(
     private val dao: Dao
 ) {
-    fun query(gameId: String, playerName: String, passphrase: String): List<Card> {
+    fun query(gameId: UUID, playerName: String, passphrase: String): List<Card> {
         return dao.getPlayerHandCards(gameId, playerName, passphrase)
     }
 }
@@ -22,7 +23,7 @@ class Endpoint(
 fun Application.getPlayerHandCards(games: Games) {
     routing {
         get("/query/{gameId}/{playerName}/{passphrase}/cards") {
-            val gameId = call.parameters["gameId"]?.trim()
+            val gameId = UUID.fromString(call.parameters["gameId"]?.trim())
             val playerName = call.parameters["playerName"]?.trim()
             val passphrase = call.parameters["passphrase"]?.trim()
 

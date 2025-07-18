@@ -8,23 +8,24 @@ import io.ktor.server.application.Application
 import io.ktor.server.response.respond
 import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
+import java.util.UUID
 
 class Endpoint(
     private val dao: Dao
 ) {
-    fun query(gameId: String): Response {
+    fun query(gameId: UUID): Response {
         return dao.getGameStats(gameId)
     }
 }
 
-fun Application.getGameStats(games: Games) {
+fun Application.getGameStats() {
     routing {
         get("/query/{gameId}/stats") {
-            val gameId = call.parameters["gameId"]?.trim()
+            val gameId = UUID.fromString(call.parameters["gameId"]?.trim())
 
             require(gameId != null) { require_game_id }
 
-            val gameStats = Endpoint(Dao(games)).query(gameId)
+            val gameStats = Endpoint(Dao()).query(gameId)
 
             call.respond(HttpStatusCode.OK, gameStats)
         }

@@ -3,7 +3,9 @@ package com.example.application.model
 import MyMessages.game_not_found
 import java.util.UUID
 
-data class Games(val games: MutableList<Game> = mutableListOf()) {
+object Games {
+    val games: MutableList<Game> = mutableListOf()
+
     fun addGame(game: Game) {
         games.add(game)
     }
