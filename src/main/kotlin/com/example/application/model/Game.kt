@@ -5,6 +5,7 @@ import MyMessages.player_not_found
 import MyMessages.player_turn_not_found
 import com.example.application.model.vo.PlayerLimit
 import com.example.application.model.vo.StackCards
+import com.example.configuration.NotFoundException
 import java.util.UUID
 
 data class Game(
@@ -67,7 +68,7 @@ data class Game(
 
     fun findPlayer(playerName: String): Player {
         val player = players.find { it.name == playerName }
-            ?: throw IllegalArgumentException(player_not_found(playerName))
+            ?: throw NotFoundException(player_not_found(playerName))
         return player
     }
 

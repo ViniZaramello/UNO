@@ -1,6 +1,7 @@
 package com.example.application.model
 
 import MyMessages.game_not_found
+import com.example.configuration.NotFoundException
 import java.util.UUID
 
 object Games {
@@ -16,6 +17,6 @@ object Games {
 
     fun findGameById(id: UUID): Game {
         return games.find { it.id == id }
-            ?: throw IllegalArgumentException(game_not_found(id))
+            ?: throw NotFoundException(message = game_not_found(id))
     }
 }
