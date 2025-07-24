@@ -6,7 +6,10 @@ import MyMessages.require_player_passphrase
 import com.example.application.command.StartGame
 import com.example.application.ports.inbound.CommandHandler
 import io.ktor.http.HttpStatusCode
+import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
+import io.ktor.server.application.install
+import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
@@ -23,7 +26,9 @@ class Endpoint(
 }
 
 fun Application.startGameRoute(handler: CommandHandler<StartGame, Unit>) {
-
+    install(ContentNegotiation) {
+        json()
+    }
     routing {
         route("/game") {
             post("/startGame") {

@@ -16,7 +16,7 @@ data class Game(
     val players: MutableList<Player> = mutableListOf(),
     var playerTurn: Int = 1,
     val stacks: StackCards = StackCards(),
-    val firstCard: Card = stacks.cardsInTable.first(),
+    var firstCard: Card = stacks.cardsInTable.first(),
     var buyCardQuantity: Int = 0,
     var reverse: Boolean = false,
     var blockPending: Boolean = false
@@ -27,6 +27,11 @@ data class Game(
         stacks.cardsInTable.clear()
         stacks.cardsInDeck.addAll(newCardDeck)
         stacks.cardsInTable.add(stacks.getFirstCard())
+        reverse = false
+        blockPending = false
+        buyCardQuantity = 0
+        firstCard = stacks.cardsInTable.first()
+
         players.forEach { player ->
             player.resetCards()
             player.lastCard = false

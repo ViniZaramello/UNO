@@ -11,6 +11,9 @@ fun Application.configureExceptionHandling() {
         exception<IllegalArgumentException> { call, cause ->
             call.respond(HttpStatusCode.BadRequest, mapOf("message" to (cause.message ?: "Invalid request")))
         }
+        exception<IllegalStateException> { call, cause ->
+            call.respond(HttpStatusCode.BadRequest, mapOf("message" to (cause.message ?: "Invalid request")))
+        }
         exception<NotFoundException> { call, cause ->
             call.respond(HttpStatusCode.BadRequest, mapOf("message" to cause.message))
         }
