@@ -124,12 +124,29 @@ data class Player(
 ### Game (Jogo)
 ```kotlin
 data class Game(
-    val id: String = UUID.randomUUID().toString(),
-    val players: MutableList<Player>,
-    val gameStatus: GameStatus,
-    val gameMode: GameMode,
-    // ... outros campos
-)
+    val id: UUID = UUID.randomUUID(),
+    val gameMode: GameMode = GameMode.DEFAULT,
+    var status: GameStatus = GameStatus.CREATED,
+    val playerLimit: PlayerLimit = PlayerLimit(),
+    val players: MutableList<Player> = mutableListOf(),
+    var playerTurn: Int = 1,
+    val stacks: StackCards = StackCards(),
+    var firstCard: Card = stacks.cardsInTable.first(),
+    var buyCardQuantity: Int = 0,
+    var reverse: Boolean = false,
+    var blockPending: Boolean = false
+) {
+    // Métodos principais do jogo
+    fun resetGame() { /* ... */ }
+    fun initialCards() { /* ... */ }
+    fun playerTurn(player: Player): Boolean { /* ... */ }
+    fun passTurn() { /* ... */ }
+    fun findPlayer(playerName: String): Player { /* ... */ }
+    fun blockPlayer(card: Card) { /* ... */ }
+    fun purchasePlayer(card: Card) { /* ... */ }
+    fun reverseTurn() { /* ... */ }
+    // ... outros métodos
+}
 ```
 
 ## API Endpoints
