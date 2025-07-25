@@ -232,15 +232,13 @@ Permite que um jogador compre cartas do monte.
 | gameId | string | Sim | ID do jogo |
 | playerName | string | Sim | Nome do jogador |
 | passphrase | string | Sim | Senha do jogador |
-| quantity | integer | Não | Quantidade de cartas (padrão: 1) |
 
 **Exemplo de Request:**
 ```json
 {
     "gameId": "123e4567-e89b-12d3-a456-426614174000",
     "playerName": "João",
-    "passphrase": "minhasenha123",
-    "quantity": 2
+    "passphrase": "minhasenha123"
 }
 ```
 
@@ -258,9 +256,10 @@ Permite que um jogador compre cartas do monte.
 ```
 
 **Regras de Negócio:**
-- Quantidade padrão: 1 carta
-- Efeitos especiais podem forçar compra múltipla
+- Sempre compra exatamente 1 carta do monte
+- Deve ser a vez do jogador
 - Vez passa para próximo jogador após compra
+- Se a carta comprada for jogável, o jogador pode jogá-la imediatamente
 
 ---
 
@@ -497,8 +496,7 @@ curl -X POST http://localhost:8080/player/buyCard \
   -d '{
     "gameId": "game-id-aqui",
     "playerName": "Maria",
-    "passphrase": "senha456",
-    "quantity": 1
+    "passphrase": "senha456"
   }'
 ```
 

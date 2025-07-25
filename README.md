@@ -315,8 +315,7 @@ Jogador compra cartas do monte.
 {
     "gameId": "uuid",
     "playerName": "string",
-    "passphrase": "string",
-    "quantity": 1
+    "passphrase": "string"
 }
 ```
 
@@ -334,8 +333,8 @@ Jogador compra cartas do monte.
 ```
 
 **Regras:**
-- Quantidade padrão: 1 carta
-- Cartas especiais podem forçar compra de 2 ou 4 cartas
+- Sempre compra exatamente 1 carta
+- Deve ser a vez do jogador
 
 ---
 
@@ -557,8 +556,7 @@ curl -X POST http://localhost:8080/player/buyCard \
   -d '{
     "gameId": "123e4567-e89b-12d3-a456-426614174000",
     "playerName": "João",
-    "passphrase": "minhasenha",
-    "quantity": 1
+    "passphrase": "minhasenha"
   }'
 ```
 
