@@ -1,7 +1,7 @@
 package com.example.driver.http.buyCard
 
 import com.example.application.command.BuyCard
-import java.util.*
+import java.util.UUID
 import kotlinx.serialization.Serializable
 
 @Serializable

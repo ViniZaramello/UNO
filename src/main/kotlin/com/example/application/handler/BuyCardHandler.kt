@@ -7,11 +7,9 @@ import com.example.application.model.Card
 import com.example.application.model.Games
 import com.example.application.ports.inbound.CommandHandler
 
-class BuyCardHandler(
-    private val games: Games,
-) : CommandHandler<BuyCard, Card> {
+class BuyCardHandler : CommandHandler<BuyCard, Card> {
     override suspend fun handle(command: BuyCard): Card {
-        val game = games.findGameById(command.gameId)
+        val game = Games.findGameById(command.gameId)
         val player = game.findPlayer(command.playerName)
 
         require(player.passphrase == command.passphrase) { passphrase_invalid }

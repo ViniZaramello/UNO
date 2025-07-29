@@ -3,6 +3,7 @@ package com.example.driver.http.createGame
 import com.example.application.handler.CreateGameHandler
 import com.example.application.model.Games
 import com.example.application.shared.getFirstGame
+import com.example.module
 import io.kotest.matchers.shouldBe
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -33,6 +34,7 @@ class EndpointTest {
     fun `Should return 201 CREATED when game is created`() = testApplication {
         application {
             createGameRoute(CreateGameHandler())
+            module()
         }
         /**@Dado que exista uma request para criar um jogo*/
         val requestJson = Json.encodeToString(
@@ -50,14 +52,14 @@ class EndpointTest {
         val responseBody = response.bodyAsText()
         val responseObject = Json.decodeFromString<Response>(responseBody)
 
-        /**@Então deve retornar o status 201 Created*/
+        /**@Então deverá retornar o status 201 Created*/
         response.status shouldBe HttpStatusCode.Created
 
         /**@E o id do jogo criado deve ser igual ao id do jogo retornado*/
         val game = getFirstGame()
         responseObject.gameId shouldBe game.id.toString()
 
-        /**@E Deverá ter apenas um jogo na lista*/
+        /**@E deverá ter apenas um jogo na lista*/
         Games.games.size shouldBe 1
 
         /**@E deverá conter apenas um unico jogador com o nome e a palavra-chave definida na request*/
@@ -73,6 +75,7 @@ class EndpointTest {
     fun `Should return 400 Bad Request when request is invalid`() = testApplication {
         application {
             createGameRoute(CreateGameHandler())
+            module()
         }
         /**@Dado que exista uma request com propriedades vazias*/
         val requestJson = Json.encodeToString(
@@ -89,7 +92,7 @@ class EndpointTest {
         }
         val responseBody = response.bodyAsText()
 
-        /**@Então deve retornar o status 400 Bad Request*/
+        /**@Então deverá retornar o status 400 Bad Request*/
         response.status shouldBe HttpStatusCode.BadRequest
 
         /**@E deve apontar quais campos estão vazios*/
@@ -101,6 +104,7 @@ class EndpointTest {
     fun `Should return 400 Bad Request and passphrase required when request is invalid`() = testApplication {
         application {
             createGameRoute(CreateGameHandler())
+            module()
         }
         /**@Dado que exista uma request com propriedades uma de suas propriedades vazias para criar um jogo*/
         val requestJson = Json.encodeToString(
@@ -117,10 +121,10 @@ class EndpointTest {
         }
         val responseBody = response.bodyAsText()
 
-        /**@Então deve retornar o status 400 Bad Request*/
+        /**@Então deverá retornar o status 400 Bad Request*/
         response.status shouldBe HttpStatusCode.BadRequest
 
-        /**@E deve apontar quais campos estão vazios*/
+        /**@E deverá apontar uma lista de campos que estão vazios*/
         val expectedMessages = "Passphrase is required"
         responseBody shouldBe expectedMessages
     }

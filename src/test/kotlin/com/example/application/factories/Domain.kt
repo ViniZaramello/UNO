@@ -1,10 +1,13 @@
 package com.example.application.factories
 
 import com.example.application.model.Card
+import com.example.application.model.Colors
 import com.example.application.model.Game
 import com.example.application.model.GameMode
 import com.example.application.model.GameStatus
 import com.example.application.model.Player
+import com.example.application.model.PlayerStatus
+import com.example.application.model.SpecialType
 import com.example.application.model.vo.PlayerLimit
 import com.example.application.model.vo.StackCards
 import java.util.UUID
@@ -15,10 +18,13 @@ object Domain {
         name: String = "Player",
         passphrase: String = "passphrase",
         isOwner: Boolean = true,
+        status: PlayerStatus = PlayerStatus.IN_LOBBY
+
     ) = Player(
         name = name,
         passphrase = passphrase,
         owner = isOwner,
+        statusInGame = status
     )
 
     fun game(
@@ -45,5 +51,20 @@ object Domain {
         buyCardQuantity = buyCardQuantity,
         reverse = reverse,
         blockPending = blockPending
-        )
+    )
+
+    fun card(
+        id: String = UUID.randomUUID().toString(),
+        color: Colors = Colors.RED,
+        name: String = "Five Red",
+        number: String = "5",
+        special: SpecialType = SpecialType.NONE
+
+    ) = Card(
+        id = id,
+        color = color,
+        name = name,
+        number = number,
+        especial = special,
+    )
 }
