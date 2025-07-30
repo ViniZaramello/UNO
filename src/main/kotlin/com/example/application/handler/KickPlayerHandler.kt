@@ -5,7 +5,7 @@ import com.example.application.command.KickPlayer
 import com.example.application.model.Games
 import com.example.application.ports.inbound.CommandHandler
 
-class KickPlayerHandle(
+class KickPlayerHandler(
     private val games: Games,
 ) : CommandHandler<KickPlayer, Unit> {
     override suspend fun handle(command: KickPlayer) {
@@ -16,6 +16,8 @@ class KickPlayerHandle(
         player.isOwner()
 
         val targetPlayer = game.findPlayer(command.playerTarget)
+        game.transferAllCards(targetPlayer)
         game.removePlayer(targetPlayer)
+        game.reorderPlayers()
     }
 }

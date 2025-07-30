@@ -136,4 +136,17 @@ data class Game(
     }
 
     fun removePlayer(player: Player) = players.remove(player)
+
+    fun reorderPlayers() {
+        players.sortBy { it.number }
+        players.forEachIndexed { index, player ->
+            player.number = index + 1
+        }
+    }
+
+    fun transferAllCards(player: Player) {
+        player.cards.forEach { card ->
+            stacks.cardsInDeck.add(card)
+        }
+    }
 }

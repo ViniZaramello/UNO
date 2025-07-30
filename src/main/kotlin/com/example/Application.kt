@@ -5,7 +5,7 @@ import com.example.application.handler.CreateGameHandler
 import com.example.application.handler.EndGameHandler
 import com.example.application.handler.FlagLastCardHandler
 import com.example.application.handler.JoinPlayerInGameHandler
-import com.example.application.handler.KickPlayerHandle
+import com.example.application.handler.KickPlayerHandler
 import com.example.application.handler.QuitGameHandler
 import com.example.application.handler.SkipPlayerHandler
 import com.example.application.handler.StartGameHandler
@@ -41,7 +41,7 @@ fun main() {
         val throwCardHandler = ThrowCardHandler(games)
         val skipPlayerHandler = SkipPlayerHandler(games)
         val buyCardHandler = BuyCardHandler()
-        val kickPlayer = KickPlayerHandle(games)
+        val kickPlayer = KickPlayerHandler(games)
         val quitGame = QuitGameHandler(games)
 
         commandEndpointConfig(
