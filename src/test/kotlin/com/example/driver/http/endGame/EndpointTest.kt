@@ -36,7 +36,7 @@ class EndpointTest {
     }
 
     @Test
-    fun `Should return 204 when game is created`() = testApplication {
+    fun `Should return 204 when game is end`() = testApplication {
         application {
             endGameRoute(EndGameHandler())
             module()

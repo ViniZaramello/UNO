@@ -61,14 +61,13 @@ data class Game(
     }
 
     fun playerNumber(): Int {
-        check(players.size < playerLimit.playerLimit) { player_limit_exceeded }
+        check(players.size < playerLimit.playerLimit) { player_limit_exceeded(playerLimit.playerLimit) }
         return players.size + 1
     }
 
     fun verifyPlayerExists(player: Player): Boolean {
         val playerInGame = players.find { it.name == player.name }
-        require(playerInGame != null) { return false }
-        return true
+        return playerInGame == null
     }
 
     fun findPlayer(playerName: String): Player {

@@ -18,13 +18,15 @@ object Domain {
         name: String = "Player",
         passphrase: String = "passphrase",
         isOwner: Boolean = true,
-        status: PlayerStatus = PlayerStatus.IN_LOBBY
+        status: PlayerStatus = PlayerStatus.IN_LOBBY,
+        number: Int = 1
 
     ) = Player(
         name = name,
         passphrase = passphrase,
         owner = isOwner,
-        statusInGame = status
+        statusInGame = status,
+        number = number
     )
 
     fun game(
