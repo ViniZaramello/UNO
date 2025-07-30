@@ -5,6 +5,7 @@ import com.example.application.handler.BuyCardHandler
 import com.example.application.model.Card
 import com.example.application.model.Colors
 import com.example.application.model.GameStatus.PLAYING
+import com.example.application.model.GameStatus.WAITING
 import com.example.application.model.Games
 import com.example.application.model.PlayerStatus
 import com.example.application.model.SpecialType
@@ -451,5 +452,61 @@ class EndpointTest {
         /**@E deverá retornar uma mensagem infornado que é necessario informar um passphrase*/
         val expectedMessages = "Passphrase is required"
         responseBody shouldBe expectedMessages
+    }
+
+    @Test
+    fun `Should return 400 bad request when game is not started`() = testApplication {
+        application {
+            buyCardRoute(BuyCardHandler())
+            configureExceptionHandling()
+            module()
+        }
+        /**@Dado que exista um jogo com 2 jogadores*/
+        val playerList = mutableListOf(
+            Domain.player(),
+            Domain.player(name = "joca", passphrase = "xpto")
+        )
+        val game = Domain.game(
+            players = playerList,
+            /**@E que o status do jogo seja de WAITING*/
+            status = WAITING,
+        )
+
+        game.initialCards()
+        Games.addGame(game)
+
+        /**@E que exista uma request com as informações de um jogador que não está na sua vez*/
+        val requestJson = Json.encodeToString(
+            Request(
+                gameId = game.id.toString(),
+                playerName = game.players.first().name,
+                passphrase = game.players.first().passphrase
+            )
+        )
+
+        /**@Quando for feito uma requisição para comprar uma carta*/
+        val response = client.post("/player/buyCard") {
+            contentType(ContentType.Application.Json)
+            setBody(requestJson)
+        }
+
+        /**@Então deverá retornar o status 400*/
+        response.status shouldBe HttpStatusCode.BadRequest
+
+        /**@E deverá retornar uma mensagem informando que o jogador não está no seu turno*/
+        val responseBody = response.bodyAsText()
+        val json = Json.decodeFromString<Map<String, String>>(responseBody)
+        json["message"] shouldBe "The game must be started before you can play."
+
+        /**@E os jogadores da sala não deverá sofrer nenhum acréscimo de carta*/
+        val gameUpdated = getFirstGame()
+        val firstPlayer = gameUpdated.findPlayer("Player")
+        val secondPlayer = gameUpdated.findPlayer("joca")
+
+        /**@E o estado da sala não deve sofrer alterações*/
+        gameUpdated.status shouldBe WAITING
+
+        firstPlayer.cards.size shouldBe 7
+        secondPlayer.cards.size shouldBe 7
     }
 }

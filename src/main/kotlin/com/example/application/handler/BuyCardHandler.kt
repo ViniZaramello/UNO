@@ -1,9 +1,11 @@
 package com.example.application.handler
 
 import MyMessages.its_not_your_turn_to_buy
+import MyMessages.need_game_started
 import MyMessages.passphrase_invalid
 import com.example.application.command.BuyCard
 import com.example.application.model.Card
+import com.example.application.model.GameStatus
 import com.example.application.model.Games
 import com.example.application.ports.inbound.CommandHandler
 
@@ -14,6 +16,7 @@ class BuyCardHandler : CommandHandler<BuyCard, Card> {
 
         require(player.passphrase == command.passphrase) { passphrase_invalid }
         require(game.playerTurn(player)) { its_not_your_turn_to_buy }
+        require(game.status == GameStatus.PLAYING) { need_game_started }
 
         val card = game.stacks.getRandomCard()
         player.cards.add(card)
