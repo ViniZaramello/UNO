@@ -39,7 +39,7 @@ fun Application.skipPlayerRoute(handler: CommandHandler<SkipPlayer, Unit>) {
                         status = HttpStatusCode.BadRequest
                     )
                 val gameId = Endpoint(handler).command(command)
-                call.respond(HttpStatusCode.Created, game_info_id(gameId))
+                call.respond(HttpStatusCode.OK, game_info_id(gameId))
             }
         }
     }

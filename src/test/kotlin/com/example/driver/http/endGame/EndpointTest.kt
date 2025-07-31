@@ -210,7 +210,7 @@ class EndpointTest {
             module()
         }
         /**@Dado que exista um jogo já criado*/
-        val player = Domain.player(isOwner = false)
+        val player = Domain.player(owner = false)
         val game = Domain.game(players = mutableListOf(player))
         Games.addGame(game)
 

@@ -17,14 +17,14 @@ object Domain {
     fun player(
         name: String = "Player",
         passphrase: String = "passphrase",
-        isOwner: Boolean = true,
+        owner: Boolean = true,
         status: PlayerStatus = PlayerStatus.IN_LOBBY,
         number: Int = 1
 
     ) = Player(
         name = name,
         passphrase = passphrase,
-        owner = isOwner,
+        owner = owner,
         statusInGame = status,
         number = number
     )

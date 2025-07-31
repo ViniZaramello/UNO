@@ -53,7 +53,6 @@ data class Game(
             true -> {
                 if (playerTurn < players.size) playerTurn - 1 else players.size
             }
-
             false -> {
                 if (playerTurn < players.size) playerTurn + 1 else 1
             }
