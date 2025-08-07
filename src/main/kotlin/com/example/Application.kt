@@ -38,7 +38,7 @@ fun main() {
         val endGameHandler = EndGameHandler()
         val startGameHandler = StartGameHandler()
         val flagLastCardHandler = FlagLastCardHandler(games)
-        val throwCardHandler = ThrowCardHandler(games)
+        val throwCardHandler = ThrowCardHandler()
         val skipPlayerHandler = SkipPlayerHandler()
         val buyCardHandler = BuyCardHandler()
         val kickPlayer = KickPlayerHandler(games)

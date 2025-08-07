@@ -38,7 +38,7 @@ fun Application.throwCardRoute(handler: CommandHandler<ThrowCard, Unit>) {
                         status = HttpStatusCode.BadRequest
                     )
                 Endpoint(handler).command(command)
-                call.respond(HttpStatusCode.NoContent)
+                call.respond(HttpStatusCode.Accepted)
             }
         }
     }

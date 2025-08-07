@@ -1,29 +1,36 @@
 package com.example.application.handler
 
+import MyMessages.card_no_has_parity
+import MyMessages.its_not_your_turn_to_play
+import MyMessages.need_game_started
+import MyMessages.passphrase_invalid
+import MyMessages.require_color_specification
 import com.example.application.command.ThrowCard
 import com.example.application.model.Card
 import com.example.application.model.Colors
 import com.example.application.model.Game
+import com.example.application.model.GameStatus
 import com.example.application.model.Games
 import com.example.application.model.Player
 import com.example.application.ports.inbound.CommandHandler
 
-class ThrowCardHandler(
-    private val games: Games
-) : CommandHandler<ThrowCard, Unit> {
+class ThrowCardHandler : CommandHandler<ThrowCard, Unit> {
     override suspend fun handle(command: ThrowCard) {
         val (gameId, playerName, passphrase, cardId, color) = command
-        val game = games.findGameById(gameId)
+        val game = Games.findGameById(gameId)
+
+        require(game.status == GameStatus.PLAYING) { need_game_started }
+
         val player = game.findPlayer(playerName)
 
-        require(player.passphrase == passphrase) { "Invalid passphrase." }
-        game.playerTurn(player)
+        require(player.passphrase == passphrase) { passphrase_invalid }
+        require(game.playerTurn(player)) { its_not_your_turn_to_play }
 
         lastCardVerification(player, game)
 
         val card = player.getCardById(cardId)
 
-        require(game.stacks.verifyParity(card)) { "Card ${card.number} does not match the current parity." }
+        require(game.stacks.verifyParity(card)) { card_no_has_parity }
         if (game.blockPending && card.number != "block") {
             game.blockPending = false
             game.passTurn()
@@ -41,7 +48,7 @@ class ThrowCardHandler(
         when (card.number) {
             "block" -> game.blockPlayer(card)
             "changeColor" -> {
-                require(color != null) { "Use of the color change chart requires a color specification" }
+                require(color != null) { require_color_specification }
                 card.color = Colors.valueOf(color)
             }
 
