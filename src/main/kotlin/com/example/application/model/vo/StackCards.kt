@@ -27,11 +27,12 @@ class StackCards(
 
     fun getFirstCard(): Card {
         val card = cardsInDeck.random()
-        if (card.especial != NONE) {
+        return if (card.especial != NONE) {
             getFirstCard()
+        } else {
+            cardsInDeck.remove(card)
+            card
         }
-        cardsInDeck.remove(card)
-        return card
     }
 
     fun getRandomCards(numberOfCards: Int): MutableList<Card> {

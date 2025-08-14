@@ -3,6 +3,7 @@ package com.example.application.model
 import MyMessages.player_limit_exceeded
 import MyMessages.player_not_found
 import MyMessages.player_turn_not_found
+import MyMessages.card_is_not_valid_for_purchase
 import com.example.application.model.vo.PlayerLimit
 import com.example.application.model.vo.StackCards
 import com.example.configuration.NotFoundException
@@ -53,6 +54,7 @@ data class Game(
             true -> {
                 if (playerTurn < players.size) playerTurn - 1 else players.size
             }
+
             false -> {
                 if (playerTurn < players.size) playerTurn + 1 else 1
             }
@@ -101,18 +103,25 @@ data class Game(
         blockPending = true
     }
 
+    //TODO: refazer logica
     fun purchasePlayer(card: Card) {
-        if (!verifyNextPlayerHavePurchaseCard()) {
-            when (card.number) {
-                "plusTwo" -> buyCardQuantity += 2
-                "plusFour" -> buyCardQuantity += 4
-            }
-            return
+        //verifica se o proximo jogador possui uma carta de compra
+        //se tiver, deve ser somado em buyCardQuantity
+        //se não, deve add tudo que está em buyCardQuantity
+        //E deve passar pular a vez dele
+        buyCardQuantity += when (card.number) {
+            "plusTwo" -> 2
+            "plusFour" -> 4
+            else -> 0
         }
-        val nextPlayer = findPlayerByTurn(playerTurn)
-        nextPlayer.cards.addAll(stacks.getRandomCards(buyCardQuantity))
-        nextPlayer.lastCard = false
-        buyCardQuantity = 0
+
+        if (!verifyNextPlayerHavePurchaseCard()) {
+            val nextPlayer = findPlayerByTurn(playerTurn)
+            nextPlayer.cards.addAll(stacks.getRandomCards(buyCardQuantity))
+            nextPlayer.lastCard = false
+            buyCardQuantity = 0
+            passTurn()
+        }
     }
 
     fun reverseTurn() {

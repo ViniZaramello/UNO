@@ -19,14 +19,16 @@ object Domain {
         passphrase: String = "passphrase",
         owner: Boolean = true,
         status: PlayerStatus = PlayerStatus.IN_LOBBY,
-        number: Int = 1
+        number: Int = 1,
+        cards: MutableList<Card> = mutableListOf()
 
     ) = Player(
         name = name,
         passphrase = passphrase,
         owner = owner,
         statusInGame = status,
-        number = number
+        number = number,
+        cards = cards
     )
 
     fun game(

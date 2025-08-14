@@ -1,34 +1,34 @@
 package com.example.application.model
 
-import java.util.*
+import java.util.UUID
 
-val ACTIONCARDS: List<Card> = listOf(
-    Card(number = "", color = Colors.YELLOW, especial = SpecialType.BLOCK, name = "block yellow"),
-    Card(number = "", color = Colors.YELLOW, especial = SpecialType.REVERSE, name = "reverse yellow"),
-    Card(number = "", color = Colors.YELLOW, especial = SpecialType.BUY_TWO, name = "buyTwo yellow"),
-    Card(number = "", color = Colors.RED, especial = SpecialType.BLOCK, name = "block red"),
-    Card(number = "", color = Colors.RED, especial = SpecialType.REVERSE, name = "reverse red"),
-    Card(number = "", color = Colors.RED, especial = SpecialType.BUY_TWO, name = "buyTwo red"),
-    Card(number = "", color = Colors.GREEN, especial = SpecialType.BLOCK, name = "block green"),
-    Card(number = "", color = Colors.GREEN, especial = SpecialType.REVERSE, name = "reverse green"),
-    Card(number = "", color = Colors.GREEN, especial = SpecialType.BUY_TWO, name = "buyTwo green"),
-    Card(number = "", color = Colors.BLUE, especial = SpecialType.BLOCK, name = "block blue"),
-    Card(number = "", color = Colors.BLUE, especial = SpecialType.REVERSE, name = "reverse blue"),
-    Card(number = "", color = Colors.BLUE, especial = SpecialType.BUY_TWO, name = "buyTwo blue")
+private val ACTIONCARDS: List<Card> = listOf(
+    Card(number = "block", color = Colors.YELLOW, especial = SpecialType.BLOCK, name = "block yellow"),
+    Card(number = "reverse", color = Colors.YELLOW, especial = SpecialType.REVERSE, name = "reverse yellow"),
+    Card(number = "plusTwo", color = Colors.YELLOW, especial = SpecialType.BUY_TWO, name = "buyTwo yellow"),
+    Card(number = "block", color = Colors.RED, especial = SpecialType.BLOCK, name = "block red"),
+    Card(number = "reverse", color = Colors.RED, especial = SpecialType.REVERSE, name = "reverse red"),
+    Card(number = "plusTwo", color = Colors.RED, especial = SpecialType.BUY_TWO, name = "buyTwo red"),
+    Card(number = "block", color = Colors.GREEN, especial = SpecialType.BLOCK, name = "block green"),
+    Card(number = "reverse", color = Colors.GREEN, especial = SpecialType.REVERSE, name = "reverse green"),
+    Card(number = "plusTwo", color = Colors.GREEN, especial = SpecialType.BUY_TWO, name = "buyTwo green"),
+    Card(number = "block", color = Colors.BLUE, especial = SpecialType.BLOCK, name = "block blue"),
+    Card(number = "reverse", color = Colors.BLUE, especial = SpecialType.REVERSE, name = "reverse blue"),
+    Card(number = "plusTwo", color = Colors.BLUE, especial = SpecialType.BUY_TWO, name = "buyTwo blue")
 )
-val ZEROCARDS: List<Card> = listOf(
+private val ZEROCARDS: List<Card> = listOf(
     Card(number = "0", color = Colors.YELLOW, especial = SpecialType.NONE, name = "zero yellow"),
     Card(number = "0", color = Colors.RED, especial = SpecialType.NONE, name = "zero red"),
     Card(number = "0", color = Colors.GREEN, especial = SpecialType.NONE, name = "zero green"),
     Card(number = "0", color = Colors.BLUE, especial = SpecialType.NONE, name = "zero blue"),
 )
 
-val SPECIALCARDS: List<Card> = listOf(
+private val SPECIALCARDS: List<Card> = listOf(
     Card(number = "plusFour", color = Colors.BLACK, especial = SpecialType.BUY_FOUR, name = "buy-four"),
     Card(number = "changeColor", color = Colors.BLACK, especial = SpecialType.CHANGE_COLOR, name = "change-color"),
 )
 
-val NUMERICCARDS = listOf(
+private val NUMERICCARDS = listOf(
     Card(number = "1", color = Colors.YELLOW, especial = SpecialType.NONE, name = "one yellow"),
     Card(number = "2", color = Colors.YELLOW, especial = SpecialType.NONE, name = "two yellow"),
     Card(number = "3", color = Colors.YELLOW, especial = SpecialType.NONE, name = "three yellow"),
@@ -70,7 +70,7 @@ val NUMERICCARDS = listOf(
     Card(number = "9", color = Colors.BLUE, especial = SpecialType.NONE, name = "nine blue"),
 )
 
-val DECK = buildList {
+private val DECK = buildList {
     NUMERICCARDS.forEach { card: Card ->
         repeat(2) {
             add(card.copy(id = UUID.randomUUID().toString()))

@@ -49,20 +49,40 @@ class ThrowCardHandler : CommandHandler<ThrowCard, Unit> {
             "block" -> game.blockPlayer(card)
             "changeColor" -> {
                 require(color != null) { require_color_specification }
-                card.color = Colors.valueOf(color)
+                card.color = findColor(color)
             }
 
-            "reverse" -> game.reverseTurn()
-            "plusTwo", "plusFour" -> game.purchasePlayer(card)
+            "reverse" -> {
+                game.reverseTurn()
+                game.passTurn()
+            }
+
+            "plusTwo" -> game.purchasePlayer(card)
+            "plusFour" -> {
+                require(color != null) { require_color_specification }
+                card.color = findColor(color)
+                game.purchasePlayer(card)
+            }
         }
         game.stacks.throwCard(card, player)
     }
 
     private fun lastCardVerification(player: Player, game: Game) {
-        if (!player.isLastCard()) {
-            val penaltyCards: List<Card> = game.stacks.getRandomCards(2)
-            player.lastCard = false
-            player.cards.addAll(penaltyCards)
+        when (player.cards.size) {
+            1 -> {
+                if (player.lastCard) {
+                    return
+                } else {
+                    val penaltyCards: List<Card> = game.stacks.getRandomCards(2)
+                    player.lastCard = false
+                    player.cards.addAll(penaltyCards)
+                }
+            }
+
+            else -> return
         }
     }
+
+    private fun findColor(color: String) = Colors.entries.find { it.name.equals(color, ignoreCase = true) }
+        ?: throw IllegalArgumentException(MyMessages.invalid_color(color))
 }
