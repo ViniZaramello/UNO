@@ -18,8 +18,6 @@ data class Player(
         cards.clear()
     }
 
-    fun isLastCard() = lastCard && cards.size == 1
-
     fun isOwner() = require(owner) { player_is_not_owner(name) }
 
     fun getCardById(cardId: UUID): Card {

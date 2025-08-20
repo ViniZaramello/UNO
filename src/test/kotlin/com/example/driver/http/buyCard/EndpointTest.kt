@@ -96,7 +96,6 @@ class EndpointTest {
     fun `Should return 202 and pass the turn when the player takes a non-special card`() = testApplication {
         application {
             buyCardRoute(BuyCardHandler())
-            configureExceptionHandling()
             module()
         }
 
@@ -160,7 +159,6 @@ class EndpointTest {
     fun `Should return 202 and not pass the turn when the player takes a special card`(): Unit = testApplication {
         application {
             buyCardRoute(BuyCardHandler())
-            configureExceptionHandling()
             module()
         }
         /**@Dado que exista um jogo com 2 jogadores jogando*/

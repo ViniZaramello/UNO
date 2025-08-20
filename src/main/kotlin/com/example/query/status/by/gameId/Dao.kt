@@ -21,7 +21,7 @@ class Dao {
                 PlayerStats(
                     playerName = player.name,
                     cardsQuantity = player.cards.size,
-                    lastCard = player.isLastCard()
+                    lastCard = player.lastCard
                 )
             },
             reverse = game.reverse,
