@@ -12,6 +12,7 @@ import com.example.application.model.Game
 import com.example.application.model.GameStatus
 import com.example.application.model.Games
 import com.example.application.model.Player
+import com.example.application.model.PlayerStatus
 import com.example.application.ports.inbound.CommandHandler
 
 class ThrowCardHandler : CommandHandler<ThrowCard, Unit> {
@@ -66,6 +67,9 @@ class ThrowCardHandler : CommandHandler<ThrowCard, Unit> {
             }
         }
         game.stacks.throwCard(card, player)
+        if(player.cards.isEmpty()){
+            player.statusInGame = PlayerStatus.FINISHED
+        }
     }
 
     private fun lastCardVerification(player: Player, game: Game) {

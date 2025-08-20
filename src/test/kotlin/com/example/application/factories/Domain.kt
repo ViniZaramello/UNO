@@ -20,7 +20,8 @@ object Domain {
         owner: Boolean = true,
         status: PlayerStatus = PlayerStatus.IN_LOBBY,
         number: Int = 1,
-        cards: MutableList<Card> = mutableListOf()
+        cards: MutableList<Card> = mutableListOf(),
+        lastCard: Boolean = false
 
     ) = Player(
         name = name,
@@ -28,7 +29,8 @@ object Domain {
         owner = owner,
         statusInGame = status,
         number = number,
-        cards = cards
+        cards = cards,
+        lastCard = lastCard
     )
 
     fun game(
