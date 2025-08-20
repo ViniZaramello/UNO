@@ -116,7 +116,13 @@ class EndpointTest {
         /**@Dado que exista um jogo já criado com 2 jogadores em partida*/
         val playerList = mutableListOf(
             Domain.player(status = PlayerStatus.PLAYING, cards = commonCardList()),
-            Domain.player(name = "joca", passphrase = "xpto", status = PlayerStatus.PLAYING, number = 2, cards = commonCardList())
+            Domain.player(
+                name = "joca",
+                passphrase = "xpto",
+                status = PlayerStatus.PLAYING,
+                number = 2,
+                cards = commonCardList()
+            )
         )
         val game = Domain.game(
             players = playerList,
@@ -188,8 +194,20 @@ class EndpointTest {
         /**@Dado que exista um jogo já criado com 3 jogadores em partida*/
         val playerList = mutableListOf(
             Domain.player(status = PlayerStatus.PLAYING, cards = commonCardList()),
-            Domain.player(name = "joca", passphrase = "xpto", status = PlayerStatus.PLAYING, number = 2, cards = commonCardList()),
-            Domain.player(name = "carlos", passphrase = "xpto", status = PlayerStatus.PLAYING, number = 3, cards = commonCardList())
+            Domain.player(
+                name = "joca",
+                passphrase = "xpto",
+                status = PlayerStatus.PLAYING,
+                number = 2,
+                cards = commonCardList()
+            ),
+            Domain.player(
+                name = "carlos",
+                passphrase = "xpto",
+                status = PlayerStatus.PLAYING,
+                number = 3,
+                cards = commonCardList()
+            )
         )
         val game = Domain.game(
             players = playerList,
@@ -249,8 +267,184 @@ class EndpointTest {
         gameUpdated.stacks.cardsInTable.last().especial shouldBe cardInHand.especial
     }
 
-    //TODO: Criar teste positivo para uma carta de compra porém o proximo jogador possui essa carta
-    //TODO: Criar teste positivo para testar a carta de reverse
+    //DONE: Criar teste positivo para uma carta de compra porém o proximo jogador possui uma carta de compra
+    @Test
+    fun `Should return 202 when player throw a special card for purchase when next player have a purshase card`() =
+        testApplication {
+            application {
+                throwCardRoute(ThrowCardHandler())
+                module()
+            }
+            /**@Dado que exista um jogo já criado com 2 jogadores em partida*/
+            val firstPlayerSpecialCard = Domain.card(
+                name = "buy-four",
+                number = "plusFour",
+                special = SpecialType.BUY_FOUR,
+                color = Colors.BLACK
+            )
+            val secondPlayerSpecialCard = Domain.card(
+                name = "buy-four",
+                number = "plusFour",
+                special = SpecialType.BUY_FOUR,
+                color = Colors.BLACK
+            )
+
+            val firstPlayerCards = commonCardList()
+            firstPlayerCards.add(firstPlayerSpecialCard)
+
+            val secondPlayerCards = commonCardList()
+            secondPlayerCards.add(secondPlayerSpecialCard)
+
+            val playerList = mutableListOf(
+                Domain.player(status = PlayerStatus.PLAYING, cards = firstPlayerCards),
+                Domain.player(
+                    name = "joca",
+                    passphrase = "xpto",
+                    status = PlayerStatus.PLAYING,
+                    number = 2,
+                    cards = secondPlayerCards
+                )
+            )
+
+            val game = Domain.game(
+                players = playerList,
+                status = PLAYING,
+                /**@E que o turno é do jogador numero 1*/
+                playerTurn = 1
+            )
+
+
+            /**@E que o jogo está em andamento*/
+            game.stacks.cardsInTable.add(Domain.card())
+            Games.addGame(game)
+
+            /**@E que exista uma request com dados validos*/
+            val requestJson = Json.encodeToString(
+                Request(
+                    gameId = game.id.toString(),
+                    playerName = game.players.first().name,
+                    passphrase = game.players.first().passphrase,
+                    cardId = firstPlayerSpecialCard.id,
+                    color = "blue"
+
+                )
+            )
+
+            /**@Quando for feito uma requisição para lançar uma carta*/
+            val response = client.post("/player/throwCard") {
+                contentType(ContentType.Application.Json)
+                setBody(requestJson)
+            }
+
+            /**@Então deverá retornar o status 202*/
+            response.status shouldBe HttpStatusCode.Accepted
+
+            /**@E o turno do jogador deve ser passado para o proximo jogador*/
+            val gameUpdated = getFirstGame()
+            gameUpdated.playerTurn shouldBe 2
+
+            /**@E deverá adicionar a quantidade de cartas como pendencia*/
+            gameUpdated.buyCardQuantity shouldBe 4
+
+            /**@E o primeiro jogador deverá permanecer com 3 cartas na mão*/
+            val firstPlayer = gameUpdated.findPlayer("Player")
+            firstPlayer.cards.size shouldBe 3
+
+            /**@E o segundo jogador não deverá conter alteração no total de cartas em sua mão*/
+            val secondPlayer = gameUpdated.findPlayer("joca")
+            secondPlayer.cards.size shouldBe 4
+
+            /**@E a carta lançada deverá ser adicionada na pilha da mesa*/
+            gameUpdated.stacks.cardsInTable.size shouldBe 3
+            gameUpdated.stacks.cardsInTable.last().id shouldBe firstPlayerSpecialCard.id
+            gameUpdated.stacks.cardsInTable.last().name shouldBe firstPlayerSpecialCard.name
+            gameUpdated.stacks.cardsInTable.last().color shouldBe firstPlayerSpecialCard.color
+            gameUpdated.stacks.cardsInTable.last().number shouldBe firstPlayerSpecialCard.number
+            gameUpdated.stacks.cardsInTable.last().especial shouldBe firstPlayerSpecialCard.especial
+        }
+
+    //DONE: Criar teste positivo para testar a carta de reverse
+    @Test
+    fun `Should return 202 when player throw a reverse card`() = testApplication {
+        application {
+            throwCardRoute(ThrowCardHandler())
+            module()
+        }
+        /**@Dado que exista um jogo já criado com 3 jogadores em partida*/
+        val playerList = mutableListOf(
+            Domain.player(status = PlayerStatus.PLAYING, cards = commonCardList()),
+            Domain.player(
+                name = "joca",
+                passphrase = "xpto",
+                status = PlayerStatus.PLAYING,
+                number = 2,
+                cards = commonCardList()
+            ),
+            Domain.player(
+                name = "abu",
+                passphrase = "xpto",
+                status = PlayerStatus.PLAYING,
+                number = 3,
+                cards = commonCardList()
+            )
+        )
+        val game = Domain.game(
+            players = playerList,
+            status = PLAYING,
+            /**@E que o turno é do jogador numero 1*/
+            playerTurn = 1
+        )
+        val cardInHand = Domain.card(
+            name = "reverse red",
+            number = "reverse",
+            special = SpecialType.REVERSE,
+            color = Colors.RED
+        )
+
+        /**@E que o jogo está em andamento*/
+        game.stacks.cardsInTable.add(Domain.card())
+        game.players.first().cards.add(cardInHand)
+        Games.addGame(game)
+
+        /**@E que exista uma request com dados validos*/
+        val requestJson = Json.encodeToString(
+            Request(
+                gameId = game.id.toString(),
+                playerName = game.players.first().name,
+                passphrase = game.players.first().passphrase,
+                cardId = cardInHand.id,
+                color = "blue"
+
+            )
+        )
+
+        /**@Quando for feito uma requisição para lançar uma carta*/
+        val response = client.post("/player/throwCard") {
+            contentType(ContentType.Application.Json)
+            setBody(requestJson)
+        }
+
+        /**@Então deverá retornar o status 202*/
+        response.status shouldBe HttpStatusCode.Accepted
+
+        /**@E o turno do jogador deve ser passado para o terceiro jogador*/
+        val gameUpdated = getFirstGame()
+        gameUpdated.playerTurn shouldBe 3
+        game.reverse shouldBe true
+
+        /**@E o primeiro jogador deverá permanecer com 3 cartas na mão*/
+        val firstPlayer = gameUpdated.findPlayer("Player")
+        firstPlayer.cards.size shouldBe 3
+
+        /**@E a carta lançada deverá ser adicionada na pilha da mesa*/
+        gameUpdated.stacks.cardsInTable.size shouldBe 3
+        gameUpdated.stacks.cardsInTable.last().id shouldBe cardInHand.id
+        gameUpdated.stacks.cardsInTable.last().name shouldBe cardInHand.name
+        gameUpdated.stacks.cardsInTable.last().color shouldBe cardInHand.color
+        gameUpdated.stacks.cardsInTable.last().number shouldBe cardInHand.number
+        gameUpdated.stacks.cardsInTable.last().especial shouldBe cardInHand.especial
+    }
+
     //TODO: Criar teste positivo para testar se a verificação de ultima carta funciona caso ele sinalize
     //TODO: Criar teste negativo para testar se a verificação de ultima carta funciona caso ele não sinalize
     //TODO: Criar teste negativo para testar quando a cor passada for invalida

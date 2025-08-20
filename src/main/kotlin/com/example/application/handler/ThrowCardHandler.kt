@@ -55,6 +55,7 @@ class ThrowCardHandler : CommandHandler<ThrowCard, Unit> {
             "reverse" -> {
                 game.reverseTurn()
                 game.passTurn()
+                game.passTurn()
             }
 
             "plusTwo" -> game.purchasePlayer(card)

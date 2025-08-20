@@ -3,7 +3,6 @@ package com.example.application.model
 import MyMessages.player_limit_exceeded
 import MyMessages.player_not_found
 import MyMessages.player_turn_not_found
-import MyMessages.card_is_not_valid_for_purchase
 import com.example.application.model.vo.PlayerLimit
 import com.example.application.model.vo.StackCards
 import com.example.configuration.NotFoundException
@@ -50,9 +49,16 @@ data class Game(
     fun playerTurn(player: Player) = (playerTurn == player.number)
 
     fun passTurn() {
+        changeTurn()
+        while(findPlayerByTurn(playerTurn).statusInGame == PlayerStatus.FINISHED){
+            changeTurn()
+        }
+    }
+
+    private fun changeTurn(){
         playerTurn = when (reverse) {
             true -> {
-                if (playerTurn < players.size) playerTurn - 1 else players.size
+                if (playerTurn == 1) players.size else playerTurn - 1
             }
 
             false -> {
@@ -91,7 +97,7 @@ data class Game(
 
     private fun verifyNextPlayerHavePurchaseCard(): Boolean {
         val nextPlayer = findPlayerByTurn(playerTurn)
-        val cardNextPlayer = nextPlayer.cards.find { it.name == "plusTwo" || it.name == "plusFour" }
+        val cardNextPlayer = nextPlayer.cards.find { it.number == "plusTwo" || it.number == "plusFour" }
         return cardNextPlayer != null
     }
 
