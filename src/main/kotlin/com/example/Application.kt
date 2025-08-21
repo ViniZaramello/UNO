@@ -10,7 +10,6 @@ import com.example.application.handler.QuitGameHandler
 import com.example.application.handler.SkipPlayerHandler
 import com.example.application.handler.StartGameHandler
 import com.example.application.handler.ThrowCardHandler
-import com.example.application.model.Games
 import com.example.configuration.configureExceptionHandling
 import com.example.configuration.configureFrameworks
 import com.example.configuration.configureHTTP
@@ -31,8 +30,6 @@ fun main() {
         configureSerialization()
         configureRouting()
 
-        val games = Games
-
         val createGameHandler = CreateGameHandler()
         val joinPlayerInGameHandler = JoinPlayerInGameHandler()
         val endGameHandler = EndGameHandler()
@@ -41,8 +38,8 @@ fun main() {
         val throwCardHandler = ThrowCardHandler()
         val skipPlayerHandler = SkipPlayerHandler()
         val buyCardHandler = BuyCardHandler()
-        val kickPlayer = KickPlayerHandler(games)
-        val quitGame = QuitGameHandler(games)
+        val kickPlayer = KickPlayerHandler()
+        val quitGame = QuitGameHandler()
 
         commandEndpointConfig(
             createGame = createGameHandler,
@@ -56,7 +53,7 @@ fun main() {
             kickPlayer = kickPlayer,
             quitGame = quitGame
         )
-        queryEndpointConfig(games)
+        queryEndpointConfig()
     }.start(wait = true)
 }
 

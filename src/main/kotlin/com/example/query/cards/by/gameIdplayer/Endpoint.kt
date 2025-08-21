@@ -20,7 +20,7 @@ class Endpoint(
     }
 }
 
-fun Application.getPlayerHandCards(games: Games) {
+fun Application.getPlayerHandCards() {
     routing {
         get("/query/{gameId}/{playerName}/{passphrase}/cards") {
             val gameId = UUID.fromString(call.parameters["gameId"]?.trim())
@@ -31,7 +31,7 @@ fun Application.getPlayerHandCards(games: Games) {
             require(playerName != null) { require_player_name }
             require(passphrase != null) { require_player_passphrase }
 
-            val cards = Endpoint(Dao(games)).query(gameId, playerName, passphrase)
+            val cards = Endpoint(Dao(Games)).query(gameId, playerName, passphrase)
 
             call.respond(HttpStatusCode.OK, cards)
         }

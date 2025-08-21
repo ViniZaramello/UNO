@@ -10,7 +10,7 @@ data class Player(
     var lastCardPlayed: Card? = null,
     var lastCard: Boolean = false,
     val passphrase: String,
-    val owner: Boolean = false,
+    var owner: Boolean = false,
     var statusInGame: PlayerStatus = PlayerStatus.IN_LOBBY,
     val cards: MutableList<Card> = mutableListOf(),
 ) {
