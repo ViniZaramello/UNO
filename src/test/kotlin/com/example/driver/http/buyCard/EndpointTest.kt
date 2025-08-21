@@ -47,10 +47,10 @@ class EndpointTest {
             buyCardRoute(BuyCardHandler())
             module()
         }
-        /**@Dado que exista um jogo com 2 jogadores jogando*/
+        /**@Dado que exista um jogo em andamento com 2 jogadores jogando*/
         val playerList = mutableListOf(
             Domain.player(status = PlayerStatus.PLAYING),
-            Domain.player(name = "joca", passphrase = "xpto", status = PlayerStatus.PLAYING)
+            Domain.player(name = "joca", passphrase = "xpto", number = 2, status = PlayerStatus.PLAYING)
         )
         val game = Domain.game(players = playerList, status = PLAYING)
         game.initialCards()
@@ -74,11 +74,11 @@ class EndpointTest {
         /**@Então deverá retornar o status 202*/
         response.status shouldBe HttpStatusCode.Accepted
 
-        /**@E o status da sala deverá remover uma carta da pilha de compra*/
+        /**@E deverá remover uma carta da pilha de compra*/
         val gameUpdated = getFirstGame()
         gameUpdated.stacks.cardsInDeck.size shouldBe 92
 
-        /**@E o primeiro jogador deverá conter 8 cartas na mão*/
+        /**@E o primeiro jogador deverá conter 8 cartas em mãos*/
         val firstPlayer = gameUpdated.findPlayer("Player")
         firstPlayer.cards.size shouldBe 8
 
@@ -87,7 +87,7 @@ class EndpointTest {
         val json = Json.decodeFromString<Card>(responseBody)
         json shouldBe firstPlayer.cards.last()
 
-        /**@E o segundo jogador deverá conter apenas 7 cartas na mão*/
+        /**@E o segundo jogador deverá conter apenas 7 cartas em mãos*/
         val secondPlayer = gameUpdated.findPlayer("joca")
         secondPlayer.cards.size shouldBe 7
     }
@@ -99,10 +99,10 @@ class EndpointTest {
             module()
         }
 
-        /**@Dado que exista um jogo com 2 jogadores jogando*/
+        /**@Dado que exista um jogo em andamento com 2 jogadores jogando*/
         val playerList = mutableListOf(
             Domain.player(status = PlayerStatus.PLAYING),
-            Domain.player(name = "joca", passphrase = "xpto", status = PlayerStatus.PLAYING)
+            Domain.player(name = "joca", passphrase = "xpto", number = 2, status = PlayerStatus.PLAYING)
         )
         val fakeCard = Domain.card()
         val stacksSpy = spyk(StackCards())
@@ -138,7 +138,7 @@ class EndpointTest {
         val gameUpdated = getFirstGame()
         gameUpdated.playerTurn shouldBe 2
 
-        /**@E o primeiro jogador deverá ter 8 cartas na mão*/
+        /**@E o primeiro jogador deverá ter 8 cartas em mãos*/
         val firstPlayer = gameUpdated.findPlayer("Player")
         firstPlayer.cards.size shouldBe 8
 
@@ -150,7 +150,7 @@ class EndpointTest {
         /**@E a carta deverá ser a mesma do mock*/
         json shouldBe fakeCard
 
-        /**@E o segundo jogador deverá conter apenas 7 cartas na mão*/
+        /**@E o segundo jogador deverá conter apenas 7 cartas em mãos*/
         val secondPlayer = gameUpdated.findPlayer("joca")
         secondPlayer.cards.size shouldBe 7
     }
@@ -161,7 +161,7 @@ class EndpointTest {
             buyCardRoute(BuyCardHandler())
             module()
         }
-        /**@Dado que exista um jogo com 2 jogadores jogando*/
+        /**@Dado que exista um jogo em andamento com 2 jogadores jogando*/
         val playerList = mutableListOf(
             Domain.player(status = PlayerStatus.PLAYING),
             Domain.player(name = "joca", passphrase = "xpto", status = PlayerStatus.PLAYING)
@@ -205,7 +205,7 @@ class EndpointTest {
         val gameUpdated = getFirstGame()
         gameUpdated.playerTurn shouldBe 1
 
-        /**@E o primeiro jogador deverá conter 8 cartas na mão*/
+        /**@E o primeiro jogador deverá conter 8 cartas em mãos*/
         val firstPlayer = gameUpdated.findPlayer("Player")
         firstPlayer.cards.size shouldBe 8
 
@@ -217,7 +217,7 @@ class EndpointTest {
         /**@E a carta deverá ser a mesma do mock*/
         json shouldBe fakeCard
 
-        /**@E o segundo player deverá ter apenas 7 cartas na mão*/
+        /**@E o segundo player deverá ter apenas 7 cartas em mãos*/
         val secondPlayer = gameUpdated.findPlayer("joca")
         secondPlayer.cards.size shouldBe 7
     }
@@ -229,7 +229,7 @@ class EndpointTest {
             configureExceptionHandling()
             module()
         }
-        /**@Dado que exista um jogo com 2 jogadores jogando*/
+        /**@Dado que exista um jogo em andamento com 2 jogadores jogando*/
         val playerList = mutableListOf(
             Domain.player(status = PlayerStatus.PLAYING),
             Domain.player(name = "joca", passphrase = "xpto", status = PlayerStatus.PLAYING)
@@ -270,9 +270,9 @@ class EndpointTest {
         /**@E os jogadores da sala não deverá sofrer nenhum acréscimo de carta*/
         val gameUpdated = getFirstGame()
         val firstPlayer = gameUpdated.findPlayer("Player")
-        val secondPlayer = gameUpdated.findPlayer("joca")
-
         firstPlayer.cards.size shouldBe 7
+
+        val secondPlayer = gameUpdated.findPlayer("joca")
         secondPlayer.cards.size shouldBe 7
     }
 
@@ -283,7 +283,7 @@ class EndpointTest {
             configureExceptionHandling()
             module()
         }
-        /**@Dado que exista um jogo com 2 jogadores jogando*/
+        /**@Dado que exista um jogo em andamento com 2 jogadores jogando*/
         val playerList = mutableListOf(
             Domain.player(status = PlayerStatus.PLAYING),
             Domain.player(name = "joca", passphrase = "xpto", status = PlayerStatus.PLAYING)
@@ -372,7 +372,7 @@ class EndpointTest {
             module()
         }
 
-        /**@Dado que exista um jogo com 2 jogadores jogando*/
+        /**@Dado que exista um jogo em andamento com 2 jogadores jogando*/
         val playerList = mutableListOf(
             Domain.player(status = PlayerStatus.PLAYING),
             Domain.player(name = "joca", passphrase = "xpto", status = PlayerStatus.PLAYING)
@@ -416,7 +416,7 @@ class EndpointTest {
             module()
         }
 
-        /**@Dado que exista um jogo com 2 jogadores jogando*/
+        /**@Dado que exista um jogo em andamento com 2 jogadores jogando*/
         val playerList = mutableListOf(
             Domain.player(status = PlayerStatus.PLAYING),
             Domain.player(name = "joca", passphrase = "xpto", status = PlayerStatus.PLAYING)
@@ -447,7 +447,7 @@ class EndpointTest {
         /**@Então deverá retornar o status 400*/
         response.status shouldBe HttpStatusCode.BadRequest
 
-        /**@E deverá retornar uma mensagem infornado que é necessario informar um passphrase*/
+        /**@E deverá retornar uma mensagem informando que é necessario informar um passphrase*/
         val expectedMessages = "Passphrase is required"
         responseBody shouldBe expectedMessages
     }
@@ -459,7 +459,7 @@ class EndpointTest {
             configureExceptionHandling()
             module()
         }
-        /**@Dado que exista um jogo com 2 jogadores*/
+        /**@Dado que exista um jogo não iniciado com 2 jogadores*/
         val playerList = mutableListOf(
             Domain.player(),
             Domain.player(name = "joca", passphrase = "xpto")
@@ -470,7 +470,6 @@ class EndpointTest {
             status = WAITING,
         )
 
-        game.initialCards()
         Games.addGame(game)
 
         /**@E que exista uma request com as informações de um jogador que não está na sua vez*/
@@ -491,7 +490,7 @@ class EndpointTest {
         /**@Então deverá retornar o status 400*/
         response.status shouldBe HttpStatusCode.BadRequest
 
-        /**@E deverá retornar uma mensagem informando que o jogador não está no seu turno*/
+        /**@E deverá retornar uma mensagem informando que a partida não foi iniciada*/
         val responseBody = response.bodyAsText()
         val json = Json.decodeFromString<Map<String, String>>(responseBody)
         json["message"] shouldBe "The game must be started before you can play."
@@ -504,7 +503,7 @@ class EndpointTest {
         /**@E o estado da sala não deve sofrer alterações*/
         gameUpdated.status shouldBe WAITING
 
-        firstPlayer.cards.size shouldBe 7
-        secondPlayer.cards.size shouldBe 7
+        firstPlayer.cards.size shouldBe 0
+        secondPlayer.cards.size shouldBe 0
     }
 }

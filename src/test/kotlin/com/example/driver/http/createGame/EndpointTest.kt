@@ -36,7 +36,7 @@ class EndpointTest {
             createGameRoute(CreateGameHandler())
             module()
         }
-        /**@Dado que exista uma request para criar um jogo*/
+        /**@Dado que exista uma request valida*/
         val requestJson = Json.encodeToString(
             Request(
                 name = "userName",
@@ -44,7 +44,7 @@ class EndpointTest {
             )
         )
 
-        /**@Quando for feito uma requisição com dados validos para criar um jogo*/
+        /**@Quando for feito uma requisição para criar um jogo*/
         val response = client.post("/game/createGame") {
             contentType(ContentType.Application.Json)
             setBody(requestJson)
@@ -92,10 +92,10 @@ class EndpointTest {
         }
         val responseBody = response.bodyAsText()
 
-        /**@Então deverá retornar o status 400 Bad Request*/
+        /**@Então deverá retornar o status 400 Bad Request */
         response.status shouldBe HttpStatusCode.BadRequest
 
-        /**@E deve apontar quais campos estão vazios*/
+        /**@E deve apontar quais campos estão vazios */
         val expectedMessages = "Player name is required, Passphrase is required"
         responseBody shouldBe expectedMessages
     }
@@ -106,7 +106,7 @@ class EndpointTest {
             createGameRoute(CreateGameHandler())
             module()
         }
-        /**@Dado que exista uma request com propriedades uma de suas propriedades vazias para criar um jogo*/
+        /**@Dado que exista uma request com uma de suas propriedades vazias */
         val requestJson = Json.encodeToString(
             Request(
                 name = "NameUser",
@@ -114,17 +114,17 @@ class EndpointTest {
             )
         )
 
-        /**@Quando for feito uma requisição com dados invalidos para criar um jogo*/
+        /**@Quando for feito uma requisição com dados invalidos para criar um jogo */
         val response = client.post("/game/createGame") {
             contentType(ContentType.Application.Json)
             setBody(requestJson)
         }
         val responseBody = response.bodyAsText()
 
-        /**@Então deverá retornar o status 400 Bad Request*/
+        /**@Então deverá retornar o status 400 Bad Request */
         response.status shouldBe HttpStatusCode.BadRequest
 
-        /**@E deverá apontar uma lista de campos que estão vazios*/
+        /**@E deverá apontar uma lista de campos que estão vazios */
         val expectedMessages = "Passphrase is required"
         responseBody shouldBe expectedMessages
     }

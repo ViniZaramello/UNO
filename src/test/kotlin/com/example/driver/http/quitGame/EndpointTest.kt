@@ -222,7 +222,7 @@ class EndpointTest {
             )
         )
 
-        /**@Quando for feito uma requisição para pular um jogador*/
+        /**@Quando for feito uma requisição para sair de um jogo*/
         val response = client.post("/game/quitGame") {
             contentType(ContentType.Application.Json)
             setBody(requestJson)
@@ -276,7 +276,7 @@ class EndpointTest {
             )
         )
 
-        /**@Quando for feito uma requisição para pular a vez do jogador alvo*/
+        /**@Quando for feito uma requisição para sair de um jogo*/
         val response = client.post("/game/quitGame") {
             contentType(ContentType.Application.Json)
             setBody(requestJson)

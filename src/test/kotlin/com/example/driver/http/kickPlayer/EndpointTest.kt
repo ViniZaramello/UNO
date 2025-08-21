@@ -173,7 +173,7 @@ class EndpointTest {
             )
         )
 
-        /**@Quando for feito uma requisição para pular um jogador*/
+        /**@Quando for feito uma requisição para expulsar um jogador*/
         val response = client.post("/game/kickPlayer") {
             contentType(ContentType.Application.Json)
             setBody(requestJson)
@@ -228,7 +228,7 @@ class EndpointTest {
             )
         )
 
-        /**@Quando for feito uma requisição para pular um jogador*/
+        /**@Quando for feito uma requisição para expulsar um jogador*/
         val response = client.post("/game/kickPlayer") {
             contentType(ContentType.Application.Json)
             setBody(requestJson)
@@ -283,7 +283,7 @@ class EndpointTest {
             )
         )
 
-        /**@Quando for feito uma requisição para pular um jogador*/
+        /**@Quando for feito uma requisição para expulsar um jogador*/
         val response = client.post("/game/kickPlayer") {
             contentType(ContentType.Application.Json)
             setBody(requestJson)
@@ -389,7 +389,7 @@ class EndpointTest {
             )
         )
 
-        /**@Quando for feito uma requisição para pular um jogador*/
+        /**@Quando for feito uma requisição para expulsar um jogador*/
         val response = client.post("/game/kickPlayer") {
             contentType(ContentType.Application.Json)
             setBody(requestJson)
