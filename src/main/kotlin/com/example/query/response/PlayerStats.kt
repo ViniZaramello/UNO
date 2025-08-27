@@ -1,4 +1,4 @@
-package com.example.query.status.by.gameId.response
+package com.example.query.response
 
 import kotlinx.serialization.Serializable
 

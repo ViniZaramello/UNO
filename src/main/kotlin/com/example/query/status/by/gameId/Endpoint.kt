@@ -1,8 +1,7 @@
 package com.example.query.status.by.gameId
 
 import MyMessages.require_game_id
-import com.example.application.model.Games
-import com.example.query.status.by.gameId.response.Response
+import com.example.query.response.GameStats
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.response.respond
@@ -13,7 +12,7 @@ import java.util.UUID
 class Endpoint(
     private val dao: Dao
 ) {
-    fun query(gameId: UUID): Response {
+    fun query(gameId: UUID): GameStats {
         return dao.getGameStats(gameId)
     }
 }

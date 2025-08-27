@@ -1,4 +1,4 @@
-package com.example.query.status.by.gameId.response
+package com.example.query.response
 
 import com.example.application.model.Card
 import com.example.application.model.GameStatus
@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 
 
 @Serializable
-data class Response(
+data class GameStats(
     val gameId: String,
     val playerTurn: String,
     val cardsInStackQuantity: Int,
