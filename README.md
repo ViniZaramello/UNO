@@ -32,6 +32,7 @@ completa com cartas especiais, e todas as regras tradicionais do UNO.
 - [Expulsar um jogador](docs/REQUESTS.md#expulsar-jogador)
 - [Consulta informações da partida](docs/REQUESTS.md#consulta-partida)
 - [Consultar carta do jogador](docs/REQUESTS.md#consulta-carta-do-jogador)
+- [Passar turno](docs/REQUESTS.md#passar-turno)
 
 ---
 

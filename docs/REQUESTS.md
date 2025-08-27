@@ -11,6 +11,7 @@
     - [Lançar uma carta](#lancar-uma-carta)
     - [Comprar uma carta](#comprar-uma-carta)
     - [Sinalizar a ultima carta ](#sinalizar-ultima-carta)
+    - [Passar turno ](#passar-turno)
 - [Consultas](#endpoints-de-consulta)
     - [Consulta informações da partida](#consulta-partida)
     - [Consultar carta do jogador](#consulta-carta-do-jogador)
@@ -259,7 +260,7 @@ Força o pulo da vez de um jogador (efeito de carta especial).
 Remove um jogador do jogo. Apenas o proprietário pode expulsar jogadores.
 
 - **Informações extra sobre o endpoint**
-  - Apenas o [owner](docs/FAQ.md#owner) do jogo pode expulsar um jogador.
+    - Apenas o [owner](docs/FAQ.md#owner) do jogo pode expulsar um jogador.
 
 **Parâmetros:**
 
@@ -302,8 +303,9 @@ Remove um jogador do jogo. Apenas o proprietário pode expulsar jogadores.
 Permite que um jogador jogue uma carta.
 
 - **Informações extra sobre o endpoint**
-  - Só poderá lançar uma carta caso esteja [no seu turno](docs/FAQ.md#turno)
-  - Caso possua uma carta especial de comprar 4 ou de mudar a cor, deverá incluir a propriedade color na request com a **[cor de sua escolha](docs/FAQ.md#cores)** para o proximo turno
+    - Só poderá lançar uma carta caso esteja [no seu turno](docs/FAQ.md#turno)
+    - Caso possua uma carta especial de comprar 4 ou de mudar a cor, deverá incluir a propriedade color na request com a
+      **[cor de sua escolha](docs/FAQ.md#cores)** para o proximo turno
 
 **Parâmetros:**
 
@@ -346,9 +348,9 @@ Permite que um jogador jogue uma carta.
 Permite que um jogador compre cartas do monte.
 
 - **Informações extra sobre o endpoint**
-  - Só poderá comprar carta caso esteja na sua vez.
-  - Caso a carta retirada não for compativel, sua vez será pulada automaticamente
-  - Caso a carta tirada for compativel, o jogo permitirá você lançar ela ou passar a vez
+    - Só poderá comprar carta caso esteja na sua vez.
+    - Caso a carta retirada não for compativel, sua vez será pulada automaticamente
+    - Caso a carta tirada for compativel, o jogo permitirá você lançar ela ou passar a vez
 
 **Parâmetros:**
 
@@ -397,9 +399,47 @@ Permite que um jogador compre cartas do monte.
 Sinaliza UNO quando o jogador tem apenas uma carta.
 
 - **Informações extra sobre o endpoint**
-  - Caso tenha sobrado apenas uma carta na sua mão após um turno, deverá sinalisar que possui apenas uma carta
-  - Terá até a proxima rotação de vez para sinalizar que está com a ultima carta, caso não sinalisar e chegar a sua vez, será penalizado
-  - Caso sinalize mesmo estando com mais cartas, será penalizado.
+    - Caso tenha sobrado apenas uma carta na sua mão após um turno, deverá sinalisar que possui apenas uma carta
+    - Terá até a proxima rotação de vez para sinalizar que está com a ultima carta, caso não sinalisar e chegar a sua
+      vez, será penalizado
+    - Caso sinalize mesmo estando com mais cartas, será penalizado.
+
+**Parâmetros:**
+
+| Campo      | Tipo   | Obrigatório | Descrição        |
+|------------|--------|-------------|------------------|
+| gameId     | string | Sim         | ID do jogo       |
+| playerName | string | Sim         | Nome do jogador  |
+| passphrase | string | Sim         | Senha do jogador |
+
+### Request
+
+```json
+{
+  "gameId": "123e4567-e89b-12d3-a456-426614174000",
+  "playerName": "João",
+  "passphrase": "minhasenha123"
+}
+```
+
+### Response
+
+**204 No content**
+
+**400 Bad Request**
+
+**404 Not Found**
+
+---
+
+<div id='passar-turno'></div>
+
+### [POST] /player/passTurn
+
+Sinaliza UNO quando o jogador tem apenas uma carta.
+
+- **Informações extra sobre o endpoint**
+    - Caso tenha comprado uma carta com paridade mas quer passar seu turno, utilize esse endpoint
 
 **Parâmetros:**
 

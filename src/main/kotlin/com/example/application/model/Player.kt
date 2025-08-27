@@ -13,6 +13,7 @@ data class Player(
     var owner: Boolean = false,
     var statusInGame: PlayerStatus = PlayerStatus.IN_LOBBY,
     val cards: MutableList<Card> = mutableListOf(),
+    var buyParityCard: Boolean = false,
 ) {
     fun resetCards() {
         cards.clear()

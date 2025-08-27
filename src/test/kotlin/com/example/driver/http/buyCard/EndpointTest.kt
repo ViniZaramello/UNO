@@ -209,6 +209,9 @@ class EndpointTest {
         val firstPlayer = gameUpdated.findPlayer("Player")
         firstPlayer.cards.size shouldBe 8
 
+        /**@E a propriedade que evita do jogador comprar mais vezes deverá estar como true*/
+        firstPlayer.buyParityCard shouldBe true
+
         /**@E deverá retornar as informações da carta comprada*/
         val responseBody = response.bodyAsText()
         val json = Json.decodeFromString<Card>(responseBody)
@@ -506,4 +509,61 @@ class EndpointTest {
         firstPlayer.cards.size shouldBe 0
         secondPlayer.cards.size shouldBe 0
     }
+
+    @Test
+    fun `Should return 400 when a player try to buy card twice`() = testApplication {
+        application {
+            buyCardRoute(BuyCardHandler())
+            configureExceptionHandling()
+            module()
+        }
+        /**@Dado que exista um jogo em andamento com 2 jogadores jogando*/
+        val playerList = mutableListOf(
+            /**@E o jogador já comprou uma vez */
+            Domain.player(status = PlayerStatus.PLAYING, buyParityCard = true),
+            Domain.player(name = "joca", passphrase = "xpto", number = 2, status = PlayerStatus.PLAYING)
+        )
+        val game = Domain.game(players = playerList, status = PLAYING)
+        game.initialCards()
+        Games.addGame(game)
+
+        /**@E que exista uma request valida*/
+        val requestJson = Json.encodeToString(
+            Request(
+                gameId = game.id.toString(),
+                playerName = game.players.first().name,
+                passphrase = game.players.first().passphrase
+            )
+        )
+
+        /**@Quando for feito uma requisição para comprar uma carta*/
+        val response = client.post("/player/buyCard") {
+            contentType(ContentType.Application.Json)
+            setBody(requestJson)
+        }
+
+        /**@Então deverá retornar o status 400*/
+        response.status shouldBe HttpStatusCode.BadRequest
+
+        /**@E deverá retornar uma mensagem informando que a partida não foi iniciada*/
+        val responseBody = response.bodyAsText()
+        val json = Json.decodeFromString<Map<String, String>>(responseBody)
+        json["message"] shouldBe "You have already purchased a card compatible with the card on the table, you cannot buy another one, your turn has been automatically passed."
+
+        /**@E não deverá remover uma carta da pilha de compra*/
+        val gameUpdated = getFirstGame()
+        gameUpdated.stacks.cardsInDeck.size shouldBe 93
+
+        /**@E o primeiro jogador deverá conter 7 cartas em mãos*/
+        val firstPlayer = gameUpdated.findPlayer("Player")
+        firstPlayer.cards.size shouldBe 7
+
+        /**@E seu turno deverá ser passado para o proximo*/
+        gameUpdated.playerTurn shouldBe 2
+
+        /**@E o segundo jogador deverá conter apenas 7 cartas em mãos*/
+        val secondPlayer = gameUpdated.findPlayer("joca")
+        secondPlayer.cards.size shouldBe 7
+    }
+
 }

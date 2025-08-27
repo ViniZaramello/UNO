@@ -32,6 +32,9 @@ class ThrowCardHandler : CommandHandler<ThrowCard, Unit> {
         val card = player.getCardById(cardId)
 
         require(game.stacks.verifyParity(card)) { card_no_has_parity }
+
+        player.buyParityCard = false
+
         if (game.blockPending && card.number != "block") {
             game.blockPending = false
             game.passTurn()
