@@ -1,1 +1,1 @@
-rootProject.name = "ktor-sample-graphql"
+rootProject.name = "uno-api"
