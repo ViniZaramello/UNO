@@ -8,8 +8,10 @@ RUN gradle buildFatJar --no-daemon
 
 FROM eclipse-temurin:21-jdk-alpine
 
-COPY --from=build /home/gradle/src/build/libs/*-all.jar /app/app.jar
+RUN mkdir /app
+
+COPY --from=build /home/gradle/src/build/libs /app/
 
 EXPOSE 8080
 
-CMD ["java", "-jar", "/app/*.jar"]
+CMD ["java", "-jar", "/app/uno-api-all.jar"]
