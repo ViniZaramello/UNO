@@ -4,16 +4,12 @@ COPY --chown=gradle:gradle . /home/gradle/src
 
 WORKDIR /home/gradle/src
 
-RUN gradle build --no-daemon
+RUN gradle buildFatJar --no-daemon
 
 FROM eclipse-temurin:21-jdk-alpine
 
-LABEL authors="vzaramello"
-
-RUN mkdir /app
-
-COPY --from=build /home/gradle/src/build/libs /app/
+COPY --from=build /home/gradle/src/build/libs/*-all.jar /app/app.jar
 
 EXPOSE 8080
 
-CMD ["java", "-jar", "/app/uno-api-1.0.0.jar"]
+CMD ["java", "-jar", "/app/*.jar"]
