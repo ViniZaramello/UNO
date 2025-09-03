@@ -25,7 +25,7 @@ class Endpoint(
 fun Application.flagLastCardRoute(handler: CommandHandler<FlagLastCard, Unit>) {
 
     routing {
-        route("/game") {
+        route("/player") {
             post("/flagLastCard") {
 
                 val request = call.receive<Request>()

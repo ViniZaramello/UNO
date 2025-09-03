@@ -1,304 +1,447 @@
 {
-	"info": {
-		"_postman_id": "623ca5f3-df12-497f-a4f8-90c3443c257f",
-		"name": "UNO",
-		"description": "HAR To Postman Generated Collection",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "34289662"
-	},
-	"item": [
-		{
-			"name": "game/createGame",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n\t\"name\": \"{{playerName}}\",\n\t\"passphrase\": {{passphrase}}\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{uno-api-url}}/game/createGame",
-					"host": [
-						"{{uno-api-url}}"
-					],
-					"path": [
-						"game",
-						"createGame"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "game/endGame",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n\t\"gameId\": \"{{gameId}}\",\n\t\"playerName\": \"{{playerName}}\",\n\t\"passphrase\": \"{{passphrase}}\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{baseURL1}}/game/endGame",
-					"host": [
-						"{{baseURL1}}"
-					],
-					"path": [
-						"game",
-						"endGame"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "game/joinGame",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"name\": \"{{playerName}}\",\n    \"passphrase\": \"{{passphrase}}\",\n    \"gameId\": \"{{gameId}}\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{baseURL1}}/game/joinGame",
-					"host": [
-						"{{baseURL1}}"
-					],
-					"path": [
-						"game",
-						"joinGame"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "game/startGame",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					},
-					{
-						"key": "User-Agent",
-						"value": "insomnia/11.1.0"
-					}
-				],
-				"url": {
-					"raw": "{{baseURL1}}/game/startGame",
-					"host": [
-						"{{baseURL1}}"
-					],
-					"path": [
-						"game",
-						"startGame"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "game/startGame",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					},
-					{
-						"key": "User-Agent",
-						"value": "insomnia/11.1.0"
-					}
-				],
-				"url": {
-					"raw": "{{baseURL1}}/game/startGame",
-					"host": [
-						"{{baseURL1}}"
-					],
-					"path": [
-						"game",
-						"startGame"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "player/buyCard",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					},
-					{
-						"key": "User-Agent",
-						"value": "insomnia/11.1.0"
-					}
-				],
-				"url": {
-					"raw": "{{baseURL1}}/player/buyCard",
-					"host": [
-						"{{baseURL1}}"
-					],
-					"path": [
-						"player",
-						"buyCard"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "game/skipPlayer",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					},
-					{
-						"key": "User-Agent",
-						"value": "insomnia/11.1.0"
-					}
-				],
-				"url": {
-					"raw": "{{baseURL1}}/game/skipPlayer",
-					"host": [
-						"{{baseURL1}}"
-					],
-					"path": [
-						"game",
-						"skipPlayer"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "player/throwCard",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					},
-					{
-						"key": "User-Agent",
-						"value": "insomnia/11.1.0"
-					}
-				],
-				"url": {
-					"raw": "{{baseURL1}}/player/throwCard",
-					"host": [
-						"{{baseURL1}}"
-					],
-					"path": [
-						"player",
-						"throwCard"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "query/{gameId}/stats",
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					}
-				],
-				"url": {
-					"raw": "{{baseURL1}}/query/{{gameId}}/stats",
-					"host": [
-						"{{baseURL1}}"
-					],
-					"path": [
-						"query",
-						"{{gameId}}",
-						"stats"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "query/{gameId}/{playerName}/{passphrase}/cards",
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					}
-				],
-				"url": {
-					"raw": "{{baseURL1}}/query/{{gameId}}/{{playerName}}/{{passphrase}}/cards",
-					"host": [
-						"{{baseURL1}}"
-					],
-					"path": [
-						"query",
-						"{{gameId}}",
-						"{{playerName}}",
-						"{{passphrase}}",
-						"cards"
-					]
-				}
-			},
-			"response": []
-		}
-	],
-	"variable": [
-		{
-			"key": "baseURL1",
-			"value": "http://0.0.0.0:8080",
-			"type": "any"
-		},
-		{
-			"key": "uno-api-url",
-			"value": "",
-			"type": "default"
-		}
-	]
+  "info": {
+    "_postman_id": "623ca5f3-df12-497f-a4f8-90c3443c257f",
+    "name": "UNO",
+    "description": "HAR To Postman Generated Collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "34289662"
+  },
+  "item": [
+    {
+      "name": "game/createGame",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const response = pm.response.json();",
+              "pm.environment.set(\"gameId\", response.gameId);"
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n\t\"name\": \"{{playerName}}\",\n\t\"passphrase\": {{passphrase}}\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{uno-api-url}}/game/createGame",
+          "host": [
+            "{{uno-api-url}}"
+          ],
+          "path": [
+            "game",
+            "createGame"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "game/endGame",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n\t\"gameId\": \"{{gameId}}\",\n\t\"playerName\": \"{{playerName}}\",\n\t\"passphrase\": \"{{passphrase}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{uno-api-url}}/game/endGame",
+          "host": [
+            "{{uno-api-url}}"
+          ],
+          "path": [
+            "game",
+            "endGame"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "game/joinGame",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"name\": \"{{playerName}}\",\n    \"passphrase\": \"{{passphrase}}\",\n    \"gameId\": \"{{gameId}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{uno-api-url}}/game/joinGame",
+          "host": [
+            "{{uno-api-url}}"
+          ],
+          "path": [
+            "game",
+            "joinGame"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "game/startGame",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "User-Agent",
+            "value": "insomnia/11.1.0"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"gameId\": {{gameId}},\n    \"playerName\": {{playerName}},\n    \"passphrase\": {{passphrase}}\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{uno-api-url}}/game/startGame",
+          "host": [
+            "{{uno-api-url}}"
+          ],
+          "path": [
+            "game",
+            "startGame"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "game/quitGame",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "User-Agent",
+            "value": "insomnia/11.1.0"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"name\": {{playerName}},\n    \"passphrase\": {{passphrase}},\n    \"gameId\": {{gameId}}\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{uno-api-url}}/game/quitGame",
+          "host": [
+            "{{uno-api-url}}"
+          ],
+          "path": [
+            "game",
+            "quitGame"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "game/skipPlayer",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "User-Agent",
+            "value": "insomnia/11.1.0"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"gameId\": {{gameId}},\n    \"playerName\": {{playerName}},\n    \"passphrase\": {{passphrase}},\n    \"targetPlayerName\": \"\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{uno-api-url}}/game/skipPlayer",
+          "host": [
+            "{{uno-api-url}}"
+          ],
+          "path": [
+            "game",
+            "skipPlayer"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "game/kickPlayer",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "User-Agent",
+            "value": "insomnia/11.1.0"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"gameId\": {{gameId}},\n    \"playerName\": {{playerName}},\n    \"passphrase\": {{passphrase}},\n    \"targetPlayerName\": \"\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{uno-api-url}}/game/kickPlayer",
+          "host": [
+            "{{uno-api-url}}"
+          ],
+          "path": [
+            "game",
+            "kickPlayer"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "player/buyCard",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "User-Agent",
+            "value": "insomnia/11.1.0"
+          }
+        ],
+        "url": {
+          "raw": "{{uno-api-url}}/player/buyCard",
+          "host": [
+            "{{uno-api-url}}"
+          ],
+          "path": [
+            "player",
+            "buyCard"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "player/throwCard",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "User-Agent",
+            "value": "insomnia/11.1.0"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"gameId\": {{gameId}},\n    \"playerName\": {{playerName}},\n    \"passphrase\": {{passphrase}},\n    \"cardId\": \"\",\n    \"color\": \"\" // caso a carta seja especial (+4 ou changeColor), obrigatório passar uma cor\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{uno-api-url}}/player/throwCard",
+          "host": [
+            "{{uno-api-url}}"
+          ],
+          "path": [
+            "player",
+            "throwCard"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "player/passTurn",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "User-Agent",
+            "value": "insomnia/11.1.0"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"gameId\": {{gameId}},\n    \"playerName\": {{playerName}},\n    \"passphrase\": {{passphrase}}\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{uno-api-url}}/player/passTurn",
+          "host": [
+            "{{uno-api-url}}"
+          ],
+          "path": [
+            "player",
+            "passTurn"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "player/flagLastCard",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n\t\"gameId\": {{gameId}},\n    \"playerName\": \"{{playerName}}\",\n\t\"passphrase\": {{passphrase}}\n}"
+        },
+        "url": {
+          "raw": "{{uno-api-url}}/player/flagLastCard",
+          "host": [
+            "{{uno-api-url}}"
+          ],
+          "path": [
+            "player",
+            "flagLastCard"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "query/{gameId}/stats",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{uno-api-url}}/query/{{gameId}}/stats",
+          "host": [
+            "{{uno-api-url}}"
+          ],
+          "path": [
+            "query",
+            "{{gameId}}",
+            "stats"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "query/{gameId}/{playerName}/{passphrase}/cards",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{uno-api-url}}/query/{{gameId}}/{{playerName}}/{{passphrase}}/cards",
+          "host": [
+            "{{uno-api-url}}"
+          ],
+          "path": [
+            "query",
+            "{{gameId}}",
+            "{{playerName}}",
+            "{{passphrase}}",
+            "cards"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "uno-api-url",
+      "value": "",
+      "type": "default"
+    }
+  ]
 }

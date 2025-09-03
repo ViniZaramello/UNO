@@ -75,7 +75,7 @@ class EndpointTest {
         )
 
         /**@Quando for feito uma requisição para sinalizar que o jogador está com a ultima carta*/
-        val response = client.post("/game/flagLastCard") {
+        val response = client.post("/player/flagLastCard") {
             contentType(ContentType.Application.Json)
             setBody(requestJson)
         }
@@ -131,7 +131,7 @@ class EndpointTest {
         )
 
         /**@Quando for feito uma requisição para sinalizar que o jogador está com a ultima carta*/
-        val response = client.post("/game/flagLastCard") {
+        val response = client.post("/player/flagLastCard") {
             contentType(ContentType.Application.Json)
             setBody(requestJson)
         }
@@ -188,7 +188,7 @@ class EndpointTest {
         )
 
         /**@Quando for feito uma requisição para pular um jogador*/
-        val response = client.post("/game/flagLastCard") {
+        val response = client.post("/player/flagLastCard") {
             contentType(ContentType.Application.Json)
             setBody(requestJson)
         }
@@ -242,7 +242,7 @@ class EndpointTest {
         )
 
         /**@Quando for feito uma requisição para pular um jogador*/
-        val response = client.post("/game/flagLastCard") {
+        val response = client.post("/player/flagLastCard") {
             contentType(ContentType.Application.Json)
             setBody(requestJson)
         }
@@ -296,7 +296,7 @@ class EndpointTest {
         )
 
         /**@Quando for feito uma requisição para pular a vez do jogador alvo*/
-        val response = client.post("/game/flagLastCard") {
+        val response = client.post("/player/flagLastCard") {
             contentType(ContentType.Application.Json)
             setBody(requestJson)
         }

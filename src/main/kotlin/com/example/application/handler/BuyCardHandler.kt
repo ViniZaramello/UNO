@@ -19,7 +19,7 @@ class BuyCardHandler : CommandHandler<BuyCard, Card> {
         require(game.playerTurn(player)) { its_not_your_turn_to_buy }
         require(game.status == GameStatus.PLAYING) { need_game_started }
 
-        if(player.buyParityCard){
+        if (player.buyParityCard) {
             game.passTurn()
             player.buyParityCard = false
             throw IllegalStateException(you_have_buy_a_parity_card.toString())
@@ -28,8 +28,9 @@ class BuyCardHandler : CommandHandler<BuyCard, Card> {
         val card = game.stacks.getRandomCard()
         player.cards.add(card)
 
-        if (!game.stacks.verifyParity(card))
+        if (!game.stacks.verifyParity(card)) {
             game.passTurn()
+        }
 
         player.buyParityCard = true
         return card

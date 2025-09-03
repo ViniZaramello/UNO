@@ -31,23 +31,12 @@ class ThrowCardHandler : CommandHandler<ThrowCard, Unit> {
 
         val card = player.getCardById(cardId)
 
+        changeBuyParityCardForFalse(game, player)
+
         require(game.stacks.verifyParity(card)) { card_no_has_parity }
 
-        player.buyParityCard = false
-
-        if (game.blockPending && card.number != "block") {
-            game.blockPending = false
-            game.passTurn()
-            return
-        }
-
-        if (game.buyCardQuantity > 0 && card.number == "plusTwo" || game.buyCardQuantity > 0 && card.number == "plusFour") {
-            game.discountPendingCard(player)
-            game.passTurn()
-            return
-        }
-
-        game.passTurn()
+        verifyIsBlockPending(game, card)
+        verifyIsBuyCardPending(game, card, player)
 
         when (card.number) {
             "block" -> game.blockPlayer(card)
@@ -58,8 +47,6 @@ class ThrowCardHandler : CommandHandler<ThrowCard, Unit> {
 
             "reverse" -> {
                 game.reverseTurn()
-                game.passTurn()
-                game.passTurn()
             }
 
             "plusTwo" -> game.purchasePlayer(card)
@@ -70,7 +57,8 @@ class ThrowCardHandler : CommandHandler<ThrowCard, Unit> {
             }
         }
         game.stacks.throwCard(card, player)
-        if(player.cards.isEmpty()){
+        game.passTurn()
+        if (player.cards.isEmpty()) {
             player.statusInGame = PlayerStatus.FINISHED
         }
     }
@@ -93,4 +81,26 @@ class ThrowCardHandler : CommandHandler<ThrowCard, Unit> {
 
     private fun findColor(color: String) = Colors.entries.find { it.name.equals(color, ignoreCase = true) }
         ?: throw IllegalArgumentException(MyMessages.invalid_color(color))
+
+    private fun verifyIsBlockPending(game: Game, card: Card) {
+        if (game.blockPending && card.number != "block") {
+            game.blockPending = false
+            game.passTurn()
+            return
+        }
+    }
+
+    private fun verifyIsBuyCardPending(game: Game, card: Card, player: Player) {
+        if (game.buyCardQuantity > 0 && card.number != "plusTwo" || game.buyCardQuantity > 0 && card.number != "plusFour") {
+            game.discountPendingCard(player)
+            game.passTurn()
+            return
+        }
+    }
+
+    private fun changeBuyParityCardForFalse(game: Game, player: Player) {
+        player.buyParityCard = false
+        val nextPlayer = game.findPlayerByTurn(game.nextPlayerTurn())
+        nextPlayer.buyParityCard = false
+    }
 }

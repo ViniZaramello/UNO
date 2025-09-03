@@ -637,7 +637,7 @@ class EndpointTest {
 
         /**@E o turno não deverá ser passado */
         val gameUpdated = getFirstGame()
-        gameUpdated.playerTurn shouldBe 2
+        gameUpdated.playerTurn shouldBe 1
 
         /**@E os jogadores não deverão sofrer alteração na quantidade de carta */
         val firstPlayer = gameUpdated.findPlayer("Player")

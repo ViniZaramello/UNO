@@ -6,7 +6,7 @@ import MyMessages.player_turn_not_found
 import com.example.application.model.vo.PlayerLimit
 import com.example.application.model.vo.StackCards
 import com.example.configuration.NotFoundException
-import java.util.UUID
+import java.util.*
 
 data class Game(
     val id: UUID = UUID.randomUUID(),
@@ -50,12 +50,12 @@ data class Game(
 
     fun passTurn() {
         changeTurn()
-        while(findPlayerByTurn(playerTurn).statusInGame == PlayerStatus.FINISHED){
+        while (findPlayerByTurn(playerTurn).statusInGame == PlayerStatus.FINISHED) {
             changeTurn()
         }
     }
 
-    private fun changeTurn(){
+    private fun changeTurn() {
         playerTurn = when (reverse) {
             true -> {
                 if (playerTurn == 1) players.size else playerTurn - 1
@@ -90,13 +90,13 @@ data class Game(
     }
 
     private fun verifyNextPlayerHaveBlockCard(card: Card): Boolean {
-        val nextPlayer = findPlayerByTurn(playerTurn)
+        val nextPlayer = findPlayerByTurn(nextPlayerTurn())
         val cardNextPlayer = nextPlayer.cards.find { it.name == card.name }
         return cardNextPlayer != null
     }
 
     private fun verifyNextPlayerHavePurchaseCard(): Boolean {
-        val nextPlayer = findPlayerByTurn(playerTurn)
+        val nextPlayer = findPlayerByTurn(nextPlayerTurn())
         val cardNextPlayer = nextPlayer.cards.find { it.number == "plusTwo" || it.number == "plusFour" }
         return cardNextPlayer != null
     }
@@ -109,12 +109,7 @@ data class Game(
         blockPending = true
     }
 
-    //TODO: refazer logica
     fun purchasePlayer(card: Card) {
-        //verifica se o proximo jogador possui uma carta de compra
-        //se tiver, deve ser somado em buyCardQuantity
-        //se não, deve add tudo que está em buyCardQuantity
-        //E deve passar pular a vez dele
         buyCardQuantity += when (card.number) {
             "plusTwo" -> 2
             "plusFour" -> 4
@@ -122,7 +117,7 @@ data class Game(
         }
 
         if (!verifyNextPlayerHavePurchaseCard()) {
-            val nextPlayer = findPlayerByTurn(playerTurn)
+            val nextPlayer = findPlayerByTurn(nextPlayerTurn())
             nextPlayer.cards.addAll(stacks.getRandomCards(buyCardQuantity))
             nextPlayer.lastCard = false
             buyCardQuantity = 0
@@ -161,6 +156,16 @@ data class Game(
     fun transferAllCards(player: Player) {
         player.cards.forEach { card ->
             stacks.cardsInDeck.add(card)
+        }
+    }
+
+    fun nextPlayerTurn() = when (reverse) {
+        true -> {
+            if (playerTurn == 1) players.size else playerTurn - 1
+        }
+
+        false -> {
+            if (playerTurn < players.size) playerTurn + 1 else 1
         }
     }
 }
