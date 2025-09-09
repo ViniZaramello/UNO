@@ -32,7 +32,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n\t\"name\": \"{{playerName}}\",\n\t\"passphrase\": {{passphrase}}\n}",
+          "raw": "{\n\t\"name\": {{playerName}},\n\t\"passphrase\": {{passphrase}}\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -64,7 +64,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n\t\"gameId\": \"{{gameId}}\",\n\t\"playerName\": \"{{playerName}}\",\n\t\"passphrase\": \"{{passphrase}}\"\n}",
+          "raw": "{\n\t\"gameId\": {{gameId}},\n\t\"playerName\": {{playerName}},\n\t\"passphrase\": {{passphrase}}\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -96,7 +96,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n    \"name\": \"{{playerName}}\",\n    \"passphrase\": \"{{passphrase}}\",\n    \"gameId\": \"{{gameId}}\"\n}",
+          "raw": "{\n    \"name\": {{playerName}},\n    \"passphrase\": {{passphrase}},\n    \"gameId\": {{gameId}}\n}",
           "options": {
             "raw": {
               "language": "json"

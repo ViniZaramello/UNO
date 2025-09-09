@@ -28,8 +28,12 @@ class BuyCardHandler : CommandHandler<BuyCard, Card> {
         val card = game.stacks.getRandomCard()
         player.cards.add(card)
 
+        player.lastCard = false
+
         if (!game.stacks.verifyParity(card)) {
             game.passTurn()
+            player.buyParityCard = false
+            return card
         }
 
         player.buyParityCard = true

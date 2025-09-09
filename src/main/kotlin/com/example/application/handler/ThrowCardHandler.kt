@@ -66,16 +66,16 @@ class ThrowCardHandler : CommandHandler<ThrowCard, Unit> {
     private fun lastCardVerification(player: Player, game: Game) {
         when (player.cards.size) {
             1 -> {
-                if (player.lastCard) {
-                    return
-                } else {
+                if (!player.lastCard) {
                     val penaltyCards: List<Card> = game.stacks.getRandomCards(2)
                     player.lastCard = false
                     player.cards.addAll(penaltyCards)
                 }
             }
 
-            else -> return
+            else -> {
+                player.lastCard = false
+            }
         }
     }
 
