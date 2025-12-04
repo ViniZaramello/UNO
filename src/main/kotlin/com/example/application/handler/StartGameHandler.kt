@@ -9,6 +9,7 @@ import com.example.application.model.GameStatus.PLAYING
 import com.example.application.model.GameStatus.WAITING
 import com.example.application.model.Games
 import com.example.application.model.PlayerStatus
+import com.example.application.model.newCardDeck
 import com.example.application.ports.inbound.CommandHandler
 
 class StartGameHandler : CommandHandler<StartGame, Unit> {
@@ -23,6 +24,11 @@ class StartGameHandler : CommandHandler<StartGame, Unit> {
             PLAYING -> throw IllegalStateException(game_in_progress.toString())
             FINISHED -> game.resetGame()
             else -> game.status = WAITING
+        }
+
+        when (game.players.size) {
+            8 -> game.stacks.cardsInDeck.addAll(newCardDeck)
+            12 -> game.stacks.cardsInDeck.addAll(newCardDeck + newCardDeck)
         }
 
         require(game.players.size > 1) { min_player_requirement }
