@@ -6,12 +6,10 @@ import com.example.application.model.GameStatus.CREATED
 import com.example.application.model.GameStatus.FINISHED
 import com.example.application.model.GameStatus.PLAYING
 import com.example.application.model.GameStatus.WAITING
-import com.example.application.model.Games
 import com.example.application.model.PlayerStatus
 import com.example.application.model.SpecialType
-import com.example.application.shared.getFirstGame
 import com.example.configuration.configureExceptionHandling
-import com.example.driver.http.endGame.Request
+import com.example.driven.InMemoryGameRepository
 import com.example.module
 import io.kotest.matchers.shouldBe
 import io.ktor.client.request.post
@@ -29,26 +27,29 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class EndpointTest {
+
+    private val repository = InMemoryGameRepository()
+
     @AfterEach
     fun after() {
-        Games.games.clear()
+        repository.clear()
     }
 
     @BeforeEach
     fun before() {
-        Games.games.clear()
+        repository.clear()
     }
 
     @Test
     fun `Should return 204 when game is started`() = testApplication {
         application {
-            startGameRoute(StartGameHandler())
+            startGameRoute(StartGameHandler(repository))
             module()
         }
         /**@Dado que exista um jogo já criado com 2 players*/
         val playerList = mutableListOf(Domain.player(), Domain.player(name = "joca", passphrase = "xpto"))
         val game = Domain.game(players = playerList)
-        Games.addGame(game)
+        repository.save(game)
 
         /**@E que exista uma request com dados validos*/
         val requestJson = Json.encodeToString(
@@ -69,7 +70,7 @@ class EndpointTest {
         response.status shouldBe HttpStatusCode.NoContent
 
         /**@E o status da sala deverá ser alterado para PLAYING*/
-        val gameUpdated = getFirstGame()
+        val gameUpdated = repository.findById(game.id)
         gameUpdated.status shouldBe PLAYING
         gameUpdated.players.size shouldBe 2
         gameUpdated.reverse shouldBe false
@@ -92,19 +93,19 @@ class EndpointTest {
         gameUpdated.firstCard.especial shouldBe SpecialType.NONE
 
         /**@E Deverá conter apenas um jogo na lista*/
-        Games.games.size shouldBe 1
+        repository.size() shouldBe 1
     }
 
     @Test
     fun `Should return 400 Bad Request when minus of 2 players to start`() = testApplication {
         application {
-            startGameRoute(StartGameHandler())
+            startGameRoute(StartGameHandler(repository))
             configureExceptionHandling()
             module()
         }
         /**@Dado que exista um jogo já criado*/
         val game = Domain.game()
-        Games.addGame(game)
+        repository.save(game)
 
         /**@E que exista uma request valida*/
         val requestJson = Json.encodeToString(
@@ -130,27 +131,27 @@ class EndpointTest {
         json["message"] shouldBe "The game requires at least 2 players to start"
 
         /**@E o status da sala deverá mudar para WAITING*/
-        val gameUpdated = getFirstGame()
+        val gameUpdated = repository.findById(game.id)
         gameUpdated.status shouldBe WAITING
 
         /**@E os jogadores dentro da sala não deverá sofrer alterações*/
-        Games.games.first().players.first().statusInGame shouldBe PlayerStatus.IN_LOBBY
+        gameUpdated.players.first().statusInGame shouldBe PlayerStatus.IN_LOBBY
 
         /**@E Deverá conter apenas um jogo na lista*/
-        Games.games.size shouldBe 1
+        repository.size() shouldBe 1
     }
 
     @Test
     fun `Should return 400 Bad Request when gameStatus is PLAYING`() = testApplication {
         application {
-            startGameRoute(StartGameHandler())
+            startGameRoute(StartGameHandler(repository))
             configureExceptionHandling()
             module()
         }
         /**@Dado que exista um jogo já criado e em partida*/
         val players = mutableListOf(Domain.player(), Domain.player(name = "joca", passphrase = "xpto"))
         val game = Domain.game(status = PLAYING, players = players)
-        Games.addGame(game)
+        repository.save(game)
 
         /**@E que exista uma request valida*/
         val requestJson = Json.encodeToString(
@@ -170,33 +171,33 @@ class EndpointTest {
         /**@Então deverá retornar o status 400*/
         response.status shouldBe HttpStatusCode.BadRequest
 
-        /**@E deverá retornar uma mensagem informando que o jogo não foi encontrado*/
+        /**@E deverá retornar uma mensagem informando que o jogo já está em partida*/
         val responseBody = response.bodyAsText()
         val json = Json.decodeFromString<Map<String, String>>(responseBody)
         json["message"] shouldBe "The game is already in progress."
 
         /**@E o status do jogo não deverá sofrer alterações*/
-        val gameUpdated = getFirstGame()
+        val gameUpdated = repository.findById(game.id)
         gameUpdated.status shouldBe PLAYING
 
         /**@E os jogadores da sala não deverá sofrer alterações*/
-        Games.games.first().players.first().statusInGame shouldBe PlayerStatus.IN_LOBBY
+        gameUpdated.players.first().statusInGame shouldBe PlayerStatus.IN_LOBBY
 
         /**@E Deverá conter apenas um jogo na lista*/
-        Games.games.size shouldBe 1
+        repository.size() shouldBe 1
     }
 
     @Test
     fun `Should 204 and reset the game when gameStatus is FINISHED`() = testApplication {
         application {
-            startGameRoute(StartGameHandler())
+            startGameRoute(StartGameHandler(repository))
             configureExceptionHandling()
             module()
         }
         /**@Dado que exista um jogo já criado e está com o status FINISHED*/
         val players = mutableListOf(Domain.player(), Domain.player(name = "joca", passphrase = "xpto"))
         val game = Domain.game(status = FINISHED, players = players)
-        Games.addGame(game)
+        repository.save(game)
 
         /**@E que exista uma request valida*/
         val requestJson = Json.encodeToString(
@@ -217,7 +218,7 @@ class EndpointTest {
         response.status shouldBe HttpStatusCode.NoContent
 
         /**@E o status da jogo deverá ser alterada para PLAYING*/
-        val gameUpdated = getFirstGame()
+        val gameUpdated = repository.findById(game.id)
         gameUpdated.status shouldBe PLAYING
         gameUpdated.players.size shouldBe 2
         gameUpdated.reverse shouldBe false
@@ -240,19 +241,19 @@ class EndpointTest {
         gameUpdated.firstCard.especial shouldBe SpecialType.NONE
 
         /**@E deverá conter apenas um jogo na lista*/
-        Games.games.size shouldBe 1
+        repository.size() shouldBe 1
     }
 
     @Test
     fun `Should return 400 Bad Request when gameId is invalid`() = testApplication {
         application {
-            startGameRoute(StartGameHandler())
+            startGameRoute(StartGameHandler(repository))
             configureExceptionHandling()
             module()
         }
         /**@Dado que exista um jogo já criado*/
         val game = Domain.game()
-        Games.addGame(game)
+        repository.save(game)
 
         /**@E que exista uma request com um gameId inexistente*/
         val invalidUuid = randomUUID().toString()
@@ -279,24 +280,24 @@ class EndpointTest {
         json["message"] shouldBe "Game $invalidUuid was not found."
 
         /**@E o status tanto da sala quanto as dos jogadores não deverá sofrer alterações */
-        val gameUpdated = getFirstGame()
+        val gameUpdated = repository.findById(game.id)
         gameUpdated.status shouldBe CREATED
-        Games.games.first().players.first().statusInGame shouldBe PlayerStatus.IN_LOBBY
+        gameUpdated.players.first().statusInGame shouldBe PlayerStatus.IN_LOBBY
 
         /**@E deverá ter apenas um jogo na lista*/
-        Games.games.size shouldBe 1
+        repository.size() shouldBe 1
     }
 
     @Test
     fun `Should return 400 Bad Request when player name is invalid`() = testApplication {
         application {
-            startGameRoute(StartGameHandler())
+            startGameRoute(StartGameHandler(repository))
             configureExceptionHandling()
             module()
         }
         /**@Dado que exista um jogo já criado*/
         val game = Domain.game()
-        Games.addGame(game)
+        repository.save(game)
 
         /**@E que exista uma request com jogador inexistente*/
         val requestJson = Json.encodeToString(
@@ -322,24 +323,24 @@ class EndpointTest {
         json["message"] shouldBe "Player lineuzinho was not found in the game."
 
         /**@E o status tanto da sala quanto as dos players não deverá sofrer alterações */
-        val gameUpdated = getFirstGame()
+        val gameUpdated = repository.findById(game.id)
         gameUpdated.status shouldBe CREATED
-        Games.games.first().players.first().statusInGame shouldBe PlayerStatus.IN_LOBBY
+        gameUpdated.players.first().statusInGame shouldBe PlayerStatus.IN_LOBBY
 
         /**@E deverá ter apenas um jogo na lista*/
-        Games.games.size shouldBe 1
+        repository.size() shouldBe 1
     }
 
     @Test
     fun `Should return 400 Bad Request and passphrase required when request is invalid`() = testApplication {
         application {
-            startGameRoute(StartGameHandler())
+            startGameRoute(StartGameHandler(repository))
             configureExceptionHandling()
             module()
         }
         /**@Dado que exista um jogo já criado*/
         val game = Domain.game()
-        Games.addGame(game)
+        repository.save(game)
 
         /**@E que exista uma request com passphrase incorreto*/
         val requestJson = Json.encodeToString(
@@ -365,22 +366,22 @@ class EndpointTest {
         json["message"] shouldBe "Invalid passphrase."
 
         /**@E o status tanto da sala quanto as dos players não deverá sofrer alterações */
-        val gameUpdated = getFirstGame()
+        val gameUpdated = repository.findById(game.id)
         gameUpdated.status shouldBe CREATED
-        Games.games.first().players.first().statusInGame shouldBe PlayerStatus.IN_LOBBY
+        gameUpdated.players.first().statusInGame shouldBe PlayerStatus.IN_LOBBY
     }
 
     @Test
     fun `Should return 400 Bad Request when player is not owner`() = testApplication {
         application {
-            startGameRoute(StartGameHandler())
+            startGameRoute(StartGameHandler(repository))
             configureExceptionHandling()
             module()
         }
         /**@Dado que exista um jogo já criado*/
         val player = Domain.player(owner = false)
         val game = Domain.game(players = mutableListOf(player))
-        Games.addGame(game)
+        repository.save(game)
 
         /**@E que exista uma request valida só que com um jogador que não é owner da sala*/
         val requestJson = Json.encodeToString(
@@ -406,24 +407,24 @@ class EndpointTest {
         json["message"] shouldBe "Player ${player.name} is not the owner of the game."
 
         /**@E o status tanto da sala quanto as dos players não deverá sofrer alterações */
-        val gameUpdated = getFirstGame()
+        val gameUpdated = repository.findById(game.id)
         gameUpdated.status shouldBe CREATED
-        Games.games.first().players.first().statusInGame shouldBe PlayerStatus.IN_LOBBY
+        gameUpdated.players.first().statusInGame shouldBe PlayerStatus.IN_LOBBY
 
         /**@E deverá ter apenas um jogo na lista*/
-        Games.games.size shouldBe 1
+        repository.size() shouldBe 1
     }
 
     @Test
     fun `Should return 400 Bad Request and passphrase is empty`() = testApplication {
         application {
-            startGameRoute(StartGameHandler())
+            startGameRoute(StartGameHandler(repository))
             configureExceptionHandling()
             module()
         }
         /**@Dado que exista um jogo já criado*/
         val game = Domain.game()
-        Games.addGame(game)
+        repository.save(game)
 
         /**@E que exista uma request com o campo de passphrase vazio*/
         val requestJson = Json.encodeToString(
@@ -445,12 +446,11 @@ class EndpointTest {
         response.status shouldBe HttpStatusCode.BadRequest
 
         /**@E deverá retornar uma mensagem informando que é necessario passar um passphrase*/
-        val expectedMessages = "Passphrase is required"
-        responseBody shouldBe expectedMessages
+        responseBody shouldBe "Passphrase is required"
 
         /**@E o status tanto da sala quanto a dos players não deverá sofrer alterações*/
-        val gameUpdated = getFirstGame()
+        val gameUpdated = repository.findById(game.id)
         gameUpdated.status shouldBe CREATED
-        Games.games.first().players.first().statusInGame shouldBe PlayerStatus.IN_LOBBY
+        gameUpdated.players.first().statusInGame shouldBe PlayerStatus.IN_LOBBY
     }
 }

@@ -3,12 +3,14 @@ package com.example.application.handler
 import MyMessages.passphrase_invalid
 import com.example.application.command.QuitGame
 import com.example.application.model.GameStatus
-import com.example.application.model.Games
 import com.example.application.ports.inbound.CommandHandler
+import com.example.application.ports.outbound.GameRepository
 
-class QuitGameHandler : CommandHandler<QuitGame, Unit> {
+class QuitGameHandler(
+    private val repository: GameRepository
+) : CommandHandler<QuitGame, Unit> {
     override suspend fun handle(command: QuitGame) {
-        val game = Games.findGameById(command.gameId)
+        val game = repository.findById(command.gameId)
         val player = game.findPlayer(command.playerName)
 
         require(player.passphrase == command.passphrase) { passphrase_invalid }
@@ -20,8 +22,10 @@ class QuitGameHandler : CommandHandler<QuitGame, Unit> {
         game.removePlayer(player)
         game.reorderPlayers()
 
-        if(player.owner){
+        if (player.owner) {
             game.players.first().owner = true
         }
+
+        repository.save(game)
     }
 }

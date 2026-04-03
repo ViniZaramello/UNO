@@ -7,13 +7,15 @@ import com.example.application.command.StartGame
 import com.example.application.model.GameStatus.FINISHED
 import com.example.application.model.GameStatus.PLAYING
 import com.example.application.model.GameStatus.WAITING
-import com.example.application.model.Games
 import com.example.application.model.PlayerStatus
 import com.example.application.ports.inbound.CommandHandler
+import com.example.application.ports.outbound.GameRepository
 
-class StartGameHandler : CommandHandler<StartGame, Unit> {
+class StartGameHandler(
+    private val repository: GameRepository
+) : CommandHandler<StartGame, Unit> {
     override suspend fun handle(command: StartGame) {
-        val game = Games.findGameById(command.gameId)
+        val game = repository.findById(command.gameId)
         val player = game.findPlayer(command.playerName)
 
         require(player.passphrase == command.passphrase) { passphrase_invalid }
@@ -29,5 +31,6 @@ class StartGameHandler : CommandHandler<StartGame, Unit> {
         game.initialCards()
         game.status = PLAYING
         game.changePlayerStatus(PlayerStatus.PLAYING)
+        repository.save(game)
     }
 }
