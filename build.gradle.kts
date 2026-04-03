@@ -10,6 +10,7 @@ val mockkVersion: String by project
 val junit_platform_version: String by project
 val status_pages: String by project
 val junit_version: String by project
+val faker_version: String by project
 
 plugins {
     kotlin("jvm") version "2.1.0"
@@ -75,4 +76,5 @@ dependencies {
     testImplementation("io.rest-assured:rest-assured:$restAssured_version")
     testImplementation("io.kotest:kotest-assertions-core:$kotest_version")
     testImplementation("io.mockk:mockk:${mockkVersion}")
+    testImplementation("io.github.serpro69:kotlin-faker:${faker_version}")
 }

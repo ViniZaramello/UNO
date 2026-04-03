@@ -14,6 +14,7 @@ import com.example.application.handler.ThrowCardHandler
 import com.example.configuration.configureExceptionHandling
 import com.example.configuration.configureFrameworks
 import com.example.configuration.configureHTTP
+import com.example.driven.InMemoryGameRepository
 import com.example.driver.http.gameEndpointConfig
 import com.example.driver.http.playerEndpointConfig
 import com.example.query.queryEndpointConfig
@@ -33,8 +34,10 @@ fun main() {
         configureSerialization()
         configureRouting()
 
-        val createGameHandler = CreateGameHandler()
-        val joinPlayerInGameHandler = JoinPlayerInGameHandler()
+        val repository = InMemoryGameRepository()
+
+        val createGameHandler = CreateGameHandler(repository)
+        val joinPlayerInGameHandler = JoinPlayerInGameHandler(repository)
         val endGameHandler = EndGameHandler()
         val startGameHandler = StartGameHandler()
         val flagLastCardHandler = FlagLastCardHandler()

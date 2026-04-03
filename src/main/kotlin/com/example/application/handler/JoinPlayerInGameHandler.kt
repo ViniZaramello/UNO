@@ -5,18 +5,21 @@ import MyMessages.name_in_use
 import com.example.application.command.JoinPlayerInGame
 import com.example.application.model.GameStatus.CREATED
 import com.example.application.model.GameStatus.WAITING
-import com.example.application.model.Games
 import com.example.application.ports.inbound.CommandHandler
+import com.example.application.ports.outbound.GameRepository
 
-class JoinPlayerInGameHandler : CommandHandler<JoinPlayerInGame, Unit> {
+class JoinPlayerInGameHandler(
+    private val repository: GameRepository
+) : CommandHandler<JoinPlayerInGame, Unit> {
     override suspend fun handle(command: JoinPlayerInGame) {
         val (playerInfo, gameId) = command
-        val gameInfo = Games.findGameById(gameId)
+        val gameInfo = repository.findById(gameId)
 
         require(gameInfo.status == CREATED || gameInfo.status == WAITING) { game_is_not_available(gameInfo.id) }
         require(gameInfo.verifyPlayerExists(playerInfo)) { name_in_use(playerInfo.name) }
 
         playerInfo.number = gameInfo.playerNumber()
         gameInfo.players.add(playerInfo)
+        repository.save(gameInfo)
     }
 }
