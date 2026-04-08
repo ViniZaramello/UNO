@@ -5,12 +5,14 @@ import MyMessages.passphrase_invalid
 import MyMessages.require_target_player_is_not_turn
 import com.example.application.command.SkipPlayer
 import com.example.application.model.GameStatus
-import com.example.application.model.Games
 import com.example.application.ports.inbound.CommandHandler
+import com.example.application.ports.outbound.GameRepository
 
-class SkipPlayerHandler : CommandHandler<SkipPlayer, Unit> {
+class SkipPlayerHandler(
+    private val repository: GameRepository
+) : CommandHandler<SkipPlayer, Unit> {
     override suspend fun handle(command: SkipPlayer) {
-        val game = Games.findGameById(command.gameId)
+        val game = repository.findById(command.gameId)
         val player = game.findPlayer(command.playerName)
         val targetPlayer = game.findPlayer(command.targetPlayerName)
 
@@ -23,5 +25,6 @@ class SkipPlayerHandler : CommandHandler<SkipPlayer, Unit> {
         val penaltyCards = game.stacks.getRandomCards(2)
         targetPlayer.cards.addAll(penaltyCards)
         game.passTurn()
+        repository.save(game)
     }
 }

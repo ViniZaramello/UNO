@@ -10,15 +10,17 @@ import com.example.application.model.Card
 import com.example.application.model.Colors
 import com.example.application.model.Game
 import com.example.application.model.GameStatus
-import com.example.application.model.Games
 import com.example.application.model.Player
 import com.example.application.model.PlayerStatus
 import com.example.application.ports.inbound.CommandHandler
+import com.example.application.ports.outbound.GameRepository
 
-class ThrowCardHandler : CommandHandler<ThrowCard, Unit> {
+class ThrowCardHandler(
+    private val repository: GameRepository
+) : CommandHandler<ThrowCard, Unit> {
     override suspend fun handle(command: ThrowCard) {
         val (gameId, playerName, passphrase, cardId, color) = command
-        val game = Games.findGameById(gameId)
+        val game = repository.findById(gameId)
 
         require(game.status == GameStatus.PLAYING) { need_game_started }
 
@@ -61,6 +63,7 @@ class ThrowCardHandler : CommandHandler<ThrowCard, Unit> {
         if (player.cards.isEmpty()) {
             player.statusInGame = PlayerStatus.FINISHED
         }
+        repository.save(game)
     }
 
     private fun lastCardVerification(player: Player, game: Game) {

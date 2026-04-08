@@ -6,12 +6,14 @@ import MyMessages.passphrase_invalid
 import MyMessages.require_buy_card
 import com.example.application.command.PassTurn
 import com.example.application.model.GameStatus
-import com.example.application.model.Games
 import com.example.application.ports.inbound.CommandHandler
+import com.example.application.ports.outbound.GameRepository
 
-class PassTurnHandler : CommandHandler<PassTurn, Unit> {
+class PassTurnHandler(
+    private val repository: GameRepository
+) : CommandHandler<PassTurn, Unit> {
     override suspend fun handle(command: PassTurn) {
-        val game = Games.findGameById(command.gameId)
+        val game = repository.findById(command.gameId)
         val player = game.findPlayer(command.playerName)
 
         require(player.passphrase == command.passphrase) { passphrase_invalid }
@@ -22,5 +24,6 @@ class PassTurnHandler : CommandHandler<PassTurn, Unit> {
         player.buyParityCard = false
 
         game.passTurn()
+        repository.save(game)
     }
 }

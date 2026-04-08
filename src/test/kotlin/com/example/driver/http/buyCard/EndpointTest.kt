@@ -6,12 +6,11 @@ import com.example.application.model.Card
 import com.example.application.model.Colors
 import com.example.application.model.GameStatus.PLAYING
 import com.example.application.model.GameStatus.WAITING
-import com.example.application.model.Games
 import com.example.application.model.PlayerStatus
 import com.example.application.model.SpecialType
 import com.example.application.model.vo.StackCards
-import com.example.application.shared.getFirstGame
 import com.example.configuration.configureExceptionHandling
+import com.example.driven.InMemoryGameRepository
 import com.example.module
 import io.kotest.matchers.shouldBe
 import io.ktor.client.request.post
@@ -31,22 +30,18 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class EndpointTest {
+
+    private val repository = InMemoryGameRepository()
+
     @AfterEach
-    fun after() {
-        Games.games.clear()
-    }
+    fun after() { repository.clear() }
 
     @BeforeEach
-    fun before() {
-        Games.games.clear()
-    }
+    fun before() { repository.clear() }
 
     @Test
     fun `Should return 202 when player buy card`() = testApplication {
-        application {
-            buyCardRoute(BuyCardHandler())
-            module()
-        }
+        application { buyCardRoute(BuyCardHandler(repository)); module() }
         /**@Dado que exista um jogo em andamento com 2 jogadores jogando*/
         val playerList = mutableListOf(
             Domain.player(status = PlayerStatus.PLAYING),
@@ -54,7 +49,7 @@ class EndpointTest {
         )
         val game = Domain.game(players = playerList, status = PLAYING)
         game.initialCards()
-        Games.addGame(game)
+        repository.save(game)
 
         /**@E que exista uma request valida*/
         val requestJson = Json.encodeToString(
@@ -75,7 +70,7 @@ class EndpointTest {
         response.status shouldBe HttpStatusCode.Accepted
 
         /**@E deverá remover uma carta da pilha de compra*/
-        val gameUpdated = getFirstGame()
+        val gameUpdated = repository.findById(game.id)
         gameUpdated.stacks.cardsInDeck.size shouldBe 92
 
         /**@E o primeiro jogador deverá conter 8 cartas em mãos*/
@@ -94,11 +89,7 @@ class EndpointTest {
 
     @Test
     fun `Should return 202 and pass the turn when the player takes a non-special card`() = testApplication {
-        application {
-            buyCardRoute(BuyCardHandler())
-            module()
-        }
-
+        application { buyCardRoute(BuyCardHandler(repository)); module() }
         /**@Dado que exista um jogo em andamento com 2 jogadores jogando*/
         val playerList = mutableListOf(
             Domain.player(status = PlayerStatus.PLAYING),
@@ -108,10 +99,9 @@ class EndpointTest {
         val stacksSpy = spyk(StackCards())
         val game = Domain.game(players = playerList, status = PLAYING, stacks = stacksSpy)
         val card = Domain.card(name = "One blue", number = "1", color = Colors.BLUE)
-
         game.initialCards()
         game.stacks.cardsInTable.add(card)
-        Games.addGame(game)
+        repository.save(game)
 
         /**@E que exista uma request valida*/
         val requestJson = Json.encodeToString(
@@ -135,7 +125,7 @@ class EndpointTest {
         response.status shouldBe HttpStatusCode.Accepted
 
         /**@E o turno deverá passar para a vez do segundo jogador*/
-        val gameUpdated = getFirstGame()
+        val gameUpdated = repository.findById(game.id)
         gameUpdated.playerTurn shouldBe 2
 
         /**@E o primeiro jogador deverá ter 8 cartas em mãos*/
@@ -157,10 +147,7 @@ class EndpointTest {
 
     @Test
     fun `Should return 202 and not pass the turn when the player takes a special card`(): Unit = testApplication {
-        application {
-            buyCardRoute(BuyCardHandler())
-            module()
-        }
+        application { buyCardRoute(BuyCardHandler(repository)); module() }
         /**@Dado que exista um jogo em andamento com 2 jogadores jogando*/
         val playerList = mutableListOf(
             Domain.player(status = PlayerStatus.PLAYING),
@@ -175,10 +162,9 @@ class EndpointTest {
         val stacksSpy = spyk(StackCards())
         val game = Domain.game(players = playerList, status = PLAYING, stacks = stacksSpy)
         val card = Domain.card(name = "One blue", number = "1", color = Colors.BLUE)
-
         game.initialCards()
         game.stacks.cardsInTable.add(card)
-        Games.addGame(game)
+        repository.save(game)
 
         /**@E que exista uma request valida*/
         val requestJson = Json.encodeToString(
@@ -202,7 +188,7 @@ class EndpointTest {
         response.status shouldBe HttpStatusCode.Accepted
 
         /**@E o turno deverá permanecer para a vez do mesmo jogador*/
-        val gameUpdated = getFirstGame()
+        val gameUpdated = repository.findById(game.id)
         gameUpdated.playerTurn shouldBe 1
 
         /**@E o primeiro jogador deverá conter 8 cartas em mãos*/
@@ -227,11 +213,7 @@ class EndpointTest {
 
     @Test
     fun `Should return 400 bad request when not on the player's turn`() = testApplication {
-        application {
-            buyCardRoute(BuyCardHandler())
-            configureExceptionHandling()
-            module()
-        }
+        application { buyCardRoute(BuyCardHandler(repository)); configureExceptionHandling(); module() }
         /**@Dado que exista um jogo em andamento com 2 jogadores jogando*/
         val playerList = mutableListOf(
             Domain.player(status = PlayerStatus.PLAYING),
@@ -245,7 +227,7 @@ class EndpointTest {
         )
 
         game.initialCards()
-        Games.addGame(game)
+        repository.save(game)
 
         /**@E que exista uma request com as informações de um jogador que não está na sua vez*/
         val requestJson = Json.encodeToString(
@@ -271,7 +253,7 @@ class EndpointTest {
         json["message"] shouldBe "It is not your turn to draw a card."
 
         /**@E os jogadores da sala não deverá sofrer nenhum acréscimo de carta*/
-        val gameUpdated = getFirstGame()
+        val gameUpdated = repository.findById(game.id)
         val firstPlayer = gameUpdated.findPlayer("Player")
         firstPlayer.cards.size shouldBe 7
 
@@ -281,11 +263,7 @@ class EndpointTest {
 
     @Test
     fun `Should return 400 Bad Request when gameId is invalid`() = testApplication {
-        application {
-            buyCardRoute(BuyCardHandler())
-            configureExceptionHandling()
-            module()
-        }
+        application { buyCardRoute(BuyCardHandler(repository)); configureExceptionHandling(); module() }
         /**@Dado que exista um jogo em andamento com 2 jogadores jogando*/
         val playerList = mutableListOf(
             Domain.player(status = PlayerStatus.PLAYING),
@@ -296,7 +274,7 @@ class EndpointTest {
             status = PLAYING
         )
         game.initialCards()
-        Games.addGame(game)
+        repository.save(game)
 
         /**@E que exista uma request com gameId inexistente*/
         val invalidUuid = randomUUID().toString()
@@ -325,11 +303,7 @@ class EndpointTest {
 
     @Test
     fun `Should return 400 when player name is invalid`() = testApplication {
-        application {
-            buyCardRoute(BuyCardHandler())
-            configureExceptionHandling()
-            module()
-        }
+        application { buyCardRoute(BuyCardHandler(repository)); configureExceptionHandling(); module() }
 
         /**@Dado que exista um jogo com 2 jogadores jogando*/
         val playerList = mutableListOf(
@@ -341,7 +315,7 @@ class EndpointTest {
             status = PLAYING
         )
         game.initialCards()
-        Games.addGame(game)
+        repository.save(game)
 
         /**@E que exista uma request com um playerName inexistente na partida*/
         val requestJson = Json.encodeToString(
@@ -369,11 +343,7 @@ class EndpointTest {
 
     @Test
     fun `Should return 400 Bad Request and passphrase required when request is invalid`() = testApplication {
-        application {
-            buyCardRoute(BuyCardHandler())
-            configureExceptionHandling()
-            module()
-        }
+        application { buyCardRoute(BuyCardHandler(repository)); configureExceptionHandling(); module() }
 
         /**@Dado que exista um jogo em andamento com 2 jogadores jogando*/
         val playerList = mutableListOf(
@@ -385,7 +355,7 @@ class EndpointTest {
             status = PLAYING
         )
         game.initialCards()
-        Games.addGame(game)
+        repository.save(game)
 
         /**@E que exista uma request com um passphrase invalido*/
         val requestJson = Json.encodeToString(
@@ -413,11 +383,7 @@ class EndpointTest {
 
     @Test
     fun `Should return 400 when passphrase is empty`() = testApplication {
-        application {
-            buyCardRoute(BuyCardHandler())
-            configureExceptionHandling()
-            module()
-        }
+        application { buyCardRoute(BuyCardHandler(repository)); configureExceptionHandling(); module() }
 
         /**@Dado que exista um jogo em andamento com 2 jogadores jogando*/
         val playerList = mutableListOf(
@@ -429,7 +395,7 @@ class EndpointTest {
             status = PLAYING
         )
         game.initialCards()
-        Games.addGame(game)
+        repository.save(game)
 
         /**@E que exista uma request com o campo de passphrase vazio*/
         val requestJson = Json.encodeToString(
@@ -457,11 +423,7 @@ class EndpointTest {
 
     @Test
     fun `Should return 400 bad request when game is not started`() = testApplication {
-        application {
-            buyCardRoute(BuyCardHandler())
-            configureExceptionHandling()
-            module()
-        }
+        application { buyCardRoute(BuyCardHandler(repository)); configureExceptionHandling(); module() }
         /**@Dado que exista um jogo não iniciado com 2 jogadores*/
         val playerList = mutableListOf(
             Domain.player(),
@@ -473,7 +435,7 @@ class EndpointTest {
             status = WAITING,
         )
 
-        Games.addGame(game)
+        repository.save(game)
 
         /**@E que exista uma request com as informações de um jogador que não está na sua vez*/
         val requestJson = Json.encodeToString(
@@ -499,7 +461,7 @@ class EndpointTest {
         json["message"] shouldBe "The game must be started before you can play."
 
         /**@E os jogadores da sala não deverá sofrer nenhum acréscimo de carta*/
-        val gameUpdated = getFirstGame()
+        val gameUpdated = repository.findById(game.id)
         val firstPlayer = gameUpdated.findPlayer("Player")
         val secondPlayer = gameUpdated.findPlayer("joca")
 
@@ -512,11 +474,7 @@ class EndpointTest {
 
     @Test
     fun `Should return 400 when a player try to buy card twice`() = testApplication {
-        application {
-            buyCardRoute(BuyCardHandler())
-            configureExceptionHandling()
-            module()
-        }
+        application { buyCardRoute(BuyCardHandler(repository)); configureExceptionHandling(); module() }
         /**@Dado que exista um jogo em andamento com 2 jogadores jogando*/
         val playerList = mutableListOf(
             /**@E o jogador já comprou uma vez */
@@ -525,7 +483,7 @@ class EndpointTest {
         )
         val game = Domain.game(players = playerList, status = PLAYING)
         game.initialCards()
-        Games.addGame(game)
+        repository.save(game)
 
         /**@E que exista uma request valida*/
         val requestJson = Json.encodeToString(
@@ -551,7 +509,7 @@ class EndpointTest {
         json["message"] shouldBe "You have already purchased a card compatible with the card on the table, you cannot buy another one, your turn has been automatically passed."
 
         /**@E não deverá remover uma carta da pilha de compra*/
-        val gameUpdated = getFirstGame()
+        val gameUpdated = repository.findById(game.id)
         gameUpdated.stacks.cardsInDeck.size shouldBe 93
 
         /**@E o primeiro jogador deverá conter 7 cartas em mãos*/
@@ -565,5 +523,4 @@ class EndpointTest {
         val secondPlayer = gameUpdated.findPlayer("joca")
         secondPlayer.cards.size shouldBe 7
     }
-
 }

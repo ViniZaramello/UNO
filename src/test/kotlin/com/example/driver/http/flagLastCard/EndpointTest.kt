@@ -3,11 +3,10 @@ package com.example.driver.http.flagLastCard
 import com.example.application.factories.Domain
 import com.example.application.handler.FlagLastCardHandler
 import com.example.application.model.GameStatus.PLAYING
-import com.example.application.model.Games
 import com.example.application.model.PlayerStatus
 import com.example.application.shared.commonCardList
-import com.example.application.shared.getFirstGame
 import com.example.configuration.configureExceptionHandling
+import com.example.driven.InMemoryGameRepository
 import com.example.module
 import io.kotest.matchers.shouldBe
 import io.ktor.client.request.post
@@ -26,20 +25,18 @@ import org.junit.jupiter.api.Test
 
 class EndpointTest {
 
+    private val repository = InMemoryGameRepository()
+
     @AfterEach
-    fun after() {
-        Games.games.clear()
-    }
+    fun after() { repository.clear() }
 
     @BeforeEach
-    fun before() {
-        Games.games.clear()
-    }
+    fun before() { repository.clear() }
 
     @Test
     fun `Should return 204 when player flag last card`() = testApplication {
         application {
-            flagLastCardRoute(FlagLastCardHandler())
+            flagLastCardRoute(FlagLastCardHandler(repository))
             module()
         }
         /**@Dado que exista um jogo já criado com 2 jogadores em partida*/
@@ -63,7 +60,7 @@ class EndpointTest {
         )
         /**@E que o jogo está em andamento*/
         game.players.first().cards.add(cardInHand)
-        Games.addGame(game)
+        repository.save(game)
 
         /**@E que exista uma request com dados validos*/
         val requestJson = Json.encodeToString(
@@ -84,7 +81,7 @@ class EndpointTest {
         response.status shouldBe HttpStatusCode.NoContent
 
         /**@E o turno não deverá ser passado */
-        val gameUpdated = getFirstGame()
+        val gameUpdated = repository.findById(game.id)
         gameUpdated.playerTurn shouldBe 2
 
         /**@E a propriedade lastCard do primeiro jogador no qual fez a request deverá ser true */
@@ -96,7 +93,7 @@ class EndpointTest {
     @Test
     fun `Should return 400 when player flag last card`() = testApplication {
         application {
-            flagLastCardRoute(FlagLastCardHandler())
+            flagLastCardRoute(FlagLastCardHandler(repository))
             configureExceptionHandling()
             module()
         }
@@ -119,7 +116,7 @@ class EndpointTest {
             playerTurn = 2
         )
         /**@E que o jogo está em andamento*/
-        Games.addGame(game)
+        repository.save(game)
 
         /**@E que exista uma request com dados validos*/
         val requestJson = Json.encodeToString(
@@ -146,7 +143,7 @@ class EndpointTest {
         response.status shouldBe HttpStatusCode.BadRequest
 
         /**@E o turno não deverá ser passado */
-        val gameUpdated = getFirstGame()
+        val gameUpdated = repository.findById(game.id)
         gameUpdated.playerTurn shouldBe 2
 
         /**@E a propriedade lastCard do primeiro jogador no qual fez a request deverá ser true */
@@ -158,7 +155,7 @@ class EndpointTest {
     @Test
     fun `Should return 400 Bad Request when gameId is invalid`() = testApplication {
         application {
-            flagLastCardRoute(FlagLastCardHandler())
+            flagLastCardRoute(FlagLastCardHandler(repository))
             configureExceptionHandling()
             module()
         }
@@ -175,7 +172,7 @@ class EndpointTest {
         )
         /**@E que o jogo está em andamento*/
         game.initialCards()
-        Games.addGame(game)
+        repository.save(game)
 
         /**@E que exista uma request com um gameId inexistente*/
         val invalidUuid = randomUUID().toString()
@@ -202,7 +199,7 @@ class EndpointTest {
         json["message"] shouldBe "Game $invalidUuid was not found."
 
         /**@E o turno não deverá ser passado */
-        val gameUpdated = getFirstGame()
+        val gameUpdated = repository.findById(game.id)
         gameUpdated.playerTurn shouldBe 2
 
         /**@E o jogador alvo não deverá sofrer penalidade */
@@ -213,7 +210,7 @@ class EndpointTest {
     @Test
     fun `Should return 400 Bad Request when player name is invalid`() = testApplication {
         application {
-            flagLastCardRoute(FlagLastCardHandler())
+            flagLastCardRoute(FlagLastCardHandler(repository))
             configureExceptionHandling()
             module()
         }
@@ -230,7 +227,7 @@ class EndpointTest {
         )
         /**@E que o jogo está em andamento*/
         game.initialCards()
-        Games.addGame(game)
+        repository.save(game)
 
         /**@E que exista uma request com jogador inexistente*/
         val requestJson = Json.encodeToString(
@@ -256,7 +253,7 @@ class EndpointTest {
         json["message"] shouldBe "Player lineuzinho was not found in the game."
 
         /**@E o turno não deverá ser passado */
-        val gameUpdated = getFirstGame()
+        val gameUpdated = repository.findById(game.id)
         gameUpdated.playerTurn shouldBe 2
 
         /**@E o jogador alvo não deverá sofrer penalidade */
@@ -267,7 +264,7 @@ class EndpointTest {
     @Test
     fun `Should return 400 Bad Request and passphrase required when request is invalid`() = testApplication {
         application {
-            flagLastCardRoute(FlagLastCardHandler())
+            flagLastCardRoute(FlagLastCardHandler(repository))
             configureExceptionHandling()
             module()
         }
@@ -284,7 +281,7 @@ class EndpointTest {
         )
         /**@E que o jogo está em andamento*/
         game.initialCards()
-        Games.addGame(game)
+        repository.save(game)
 
         /**@E que exista uma request com passphrase incorreto*/
         val requestJson = Json.encodeToString(
@@ -310,7 +307,7 @@ class EndpointTest {
         json["message"] shouldBe "Invalid passphrase."
 
         /**@E o turno não deverá ser passado */
-        val gameUpdated = getFirstGame()
+        val gameUpdated = repository.findById(game.id)
         gameUpdated.playerTurn shouldBe 2
 
         /**@E o jogador alvo não deverá sofrer penalidade */

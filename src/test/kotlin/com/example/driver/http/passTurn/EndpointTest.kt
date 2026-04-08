@@ -3,11 +3,10 @@ package com.example.driver.http.passTurn
 import com.example.application.factories.Domain
 import com.example.application.handler.PassTurnHandler
 import com.example.application.model.GameStatus.PLAYING
-import com.example.application.model.Games
 import com.example.application.model.PlayerStatus
 import com.example.application.shared.commonCardList
-import com.example.application.shared.getFirstGame
 import com.example.configuration.configureExceptionHandling
+import com.example.driven.InMemoryGameRepository
 import com.example.module
 import io.kotest.matchers.shouldBe
 import io.ktor.client.request.post
@@ -26,284 +25,129 @@ import org.junit.jupiter.api.Test
 
 class EndpointTest {
 
+    private val repository = InMemoryGameRepository()
+
     @AfterEach
-    fun after() {
-        Games.games.clear()
-    }
+    fun after() { repository.clear() }
 
     @BeforeEach
-    fun before() {
-        Games.games.clear()
-    }
+    fun before() { repository.clear() }
 
     @Test
     fun `Should return 204 when player pass turn`() = testApplication {
-        application {
-            passTurnRoute(PassTurnHandler())
-            module()
-        }
-        /**@Dado que exista um jogo já criado com 2 jogadores em partida*/
+        application { passTurnRoute(PassTurnHandler(repository)); module() }
         val playerList = mutableListOf(
             Domain.player(status = PlayerStatus.PLAYING, owner = false, buyParityCard = true),
-            Domain.player(
-                name = "joca",
-                passphrase = "xpto",
-                status = PlayerStatus.PLAYING,
-                number = 2,
-                cards = commonCardList()
-            )
+            Domain.player(name = "joca", passphrase = "xpto", status = PlayerStatus.PLAYING, number = 2, cards = commonCardList())
         )
-
         val cardInHand = Domain.card()
-        val game = Domain.game(
-            players = playerList,
-            status = PLAYING,
-        )
-        /**@E que o jogo está em andamento*/
+        val game = Domain.game(players = playerList, status = PLAYING)
         game.players.first().cards.add(cardInHand)
-        Games.addGame(game)
+        repository.save(game)
 
-        /**@E que exista uma request com dados validos*/
-        val requestJson = Json.encodeToString(
-            Request(
-                gameId = game.id.toString(),
-                playerName = game.players.first().name,
-                passphrase = game.players.first().passphrase
-            )
-        )
+        val requestJson = Json.encodeToString(Request(
+            gameId = game.id.toString(), playerName = game.players.first().name, passphrase = game.players.first().passphrase
+        ))
 
-        /**@Quando for feito uma requisição para sinalizar que o jogador está com a ultima carta*/
-        val response = client.post("/player/passTurn") {
-            contentType(ContentType.Application.Json)
-            setBody(requestJson)
-        }
+        val response = client.post("/player/passTurn") { contentType(ContentType.Application.Json); setBody(requestJson) }
 
-        /**@Então deverá retornar o status 204*/
         response.status shouldBe HttpStatusCode.NoContent
-
-        /**@E o turno não deverá ser passado */
-        val gameUpdated = getFirstGame()
+        val gameUpdated = repository.findById(game.id)
         gameUpdated.playerTurn shouldBe 2
-
-        /**@E a propriedade do controlador de compra deverá ser alterado para false*/
-        val firstPlayer = gameUpdated.findPlayer("Player")
-        firstPlayer.buyParityCard shouldBe false
+        gameUpdated.findPlayer("Player").buyParityCard shouldBe false
     }
 
     @Test
     fun `Should return 400 when player try skip with not buy a card`() = testApplication {
-        application {
-            passTurnRoute(PassTurnHandler())
-            configureExceptionHandling()
-            module()
-        }
-        /**@Dado que exista um jogo já criado com 2 jogadores em partida*/
+        application { passTurnRoute(PassTurnHandler(repository)); configureExceptionHandling(); module() }
         val playerList = mutableListOf(
             Domain.player(status = PlayerStatus.PLAYING, owner = false, cards = commonCardList()),
-            Domain.player(
-                name = "joca",
-                passphrase = "xpto",
-                status = PlayerStatus.PLAYING,
-                number = 2,
-                cards = commonCardList()
-            )
+            Domain.player(name = "joca", passphrase = "xpto", status = PlayerStatus.PLAYING, number = 2, cards = commonCardList())
         )
+        val game = Domain.game(players = playerList, status = PLAYING)
+        repository.save(game)
 
-        val game = Domain.game(
-            players = playerList,
-            status = PLAYING
-        )
-        /**@E que o jogo está em andamento*/
-        Games.addGame(game)
+        val requestJson = Json.encodeToString(Request(
+            gameId = game.id.toString(), playerName = game.players.first().name, passphrase = game.players.first().passphrase
+        ))
 
-        /**@E que exista uma request com dados validos*/
-        val requestJson = Json.encodeToString(
-            Request(
-                gameId = game.id.toString(),
-                playerName = game.players.first().name,
-                passphrase = game.players.first().passphrase
-            )
-        )
+        val response = client.post("/player/passTurn") { contentType(ContentType.Application.Json); setBody(requestJson) }
 
-        /**@Quando for feito uma requisição para passar a vez*/
-        val response = client.post("/player/passTurn") {
-            contentType(ContentType.Application.Json)
-            setBody(requestJson)
-        }
-
-        /**@Então deverá retornar o status 400*/
         response.status shouldBe HttpStatusCode.BadRequest
-
-        /**@E deverá retornar uma mensagem informando que o jogador não comprou carta para pular a vez*/
-        val responseBody = response.bodyAsText()
-        val json = Json.decodeFromString<Map<String, String>>(responseBody)
-        json["message"] shouldBe "You must draw a card before skipping your turn."
-
-        /**@E o turno não deverá ser passado */
-        val gameUpdated = getFirstGame()
-        gameUpdated.playerTurn shouldBe 1
+        Json.decodeFromString<Map<String, String>>(response.bodyAsText())["message"] shouldBe "You must draw a card before skipping your turn."
+        repository.findById(game.id).playerTurn shouldBe 1
     }
 
     @Test
     fun `Should return 400 Bad Request when gameId is invalid`() = testApplication {
-        application {
-            passTurnRoute(PassTurnHandler())
-            configureExceptionHandling()
-            module()
-        }
-        /**@Dado que exista um jogo já criado com 2 jogadores em partida*/
+        application { passTurnRoute(PassTurnHandler(repository)); configureExceptionHandling(); module() }
         val playerList = mutableListOf(
             Domain.player(status = PlayerStatus.PLAYING, owner = false),
             Domain.player(name = "joca", passphrase = "xpto", status = PlayerStatus.PLAYING, number = 2)
         )
-        val game = Domain.game(
-            players = playerList,
-            status = PLAYING,
-            /**@E que o turno é do jogador numero 2*/
-            playerTurn = 2
-        )
-        /**@E que o jogo está em andamento*/
+        val game = Domain.game(players = playerList, status = PLAYING, playerTurn = 2)
         game.initialCards()
-        Games.addGame(game)
+        repository.save(game)
 
-        /**@E que exista uma request com um gameId inexistente*/
         val invalidUuid = randomUUID().toString()
-        val requestJson = Json.encodeToString(
-            Request(
-                gameId = invalidUuid,
-                playerName = game.players.first().name,
-                passphrase = game.players.first().passphrase
-            )
-        )
+        val requestJson = Json.encodeToString(Request(
+            gameId = invalidUuid, playerName = game.players.first().name, passphrase = game.players.first().passphrase
+        ))
 
-        /**@Quando for feito uma requisição para pular um jogador*/
-        val response = client.post("/player/passTurn") {
-            contentType(ContentType.Application.Json)
-            setBody(requestJson)
-        }
+        val response = client.post("/player/passTurn") { contentType(ContentType.Application.Json); setBody(requestJson) }
 
-        /**@Então deverá retornar o status 400*/
         response.status shouldBe HttpStatusCode.BadRequest
-
-        /**@E deverá retornar uma mensagem informando que o jogo não foi encontrado*/
-        val responseBody = response.bodyAsText()
-        val json = Json.decodeFromString<Map<String, String>>(responseBody)
-        json["message"] shouldBe "Game $invalidUuid was not found."
-
-        /**@E o turno não deverá ser passado */
-        val gameUpdated = getFirstGame()
+        Json.decodeFromString<Map<String, String>>(response.bodyAsText())["message"] shouldBe "Game $invalidUuid was not found."
+        val gameUpdated = repository.findById(game.id)
         gameUpdated.playerTurn shouldBe 2
-
-        /**@E o jogador alvo não deverá sofrer penalidade */
-        val secondPlayer = gameUpdated.findPlayer("joca")
-        secondPlayer.cards.size shouldBe 7
+        gameUpdated.findPlayer("joca").cards.size shouldBe 7
     }
 
     @Test
     fun `Should return 400 Bad Request when player name is invalid`() = testApplication {
-        application {
-            passTurnRoute(PassTurnHandler())
-            configureExceptionHandling()
-            module()
-        }
-        /**@Dado que exista um jogo já criado com 2 jogadores em partida*/
+        application { passTurnRoute(PassTurnHandler(repository)); configureExceptionHandling(); module() }
         val playerList = mutableListOf(
             Domain.player(status = PlayerStatus.PLAYING, owner = false),
             Domain.player(name = "joca", passphrase = "xpto", status = PlayerStatus.PLAYING, number = 2)
         )
-        val game = Domain.game(
-            players = playerList,
-            status = PLAYING,
-            /**@E que o turno é do jogador numero 2*/
-            playerTurn = 2
-        )
-        /**@E que o jogo está em andamento*/
+        val game = Domain.game(players = playerList, status = PLAYING, playerTurn = 2)
         game.initialCards()
-        Games.addGame(game)
+        repository.save(game)
 
-        /**@E que exista uma request com jogador inexistente*/
-        val requestJson = Json.encodeToString(
-            Request(
-                gameId = game.id.toString(),
-                playerName = "lineuzinho",
-                passphrase = game.players.first().passphrase
-            )
-        )
+        val requestJson = Json.encodeToString(Request(
+            gameId = game.id.toString(), playerName = "lineuzinho", passphrase = game.players.first().passphrase
+        ))
 
-        /**@Quando for feito uma requisição para pular um jogador*/
-        val response = client.post("/player/passTurn") {
-            contentType(ContentType.Application.Json)
-            setBody(requestJson)
-        }
+        val response = client.post("/player/passTurn") { contentType(ContentType.Application.Json); setBody(requestJson) }
 
-        /**@Então deverá retornar o status 400*/
         response.status shouldBe HttpStatusCode.BadRequest
-
-        /**@E deverá retornar uma mensagem informando que o jogador não foi encontrado*/
-        val responseBody = response.bodyAsText()
-        val json = Json.decodeFromString<Map<String, String>>(responseBody)
-        json["message"] shouldBe "Player lineuzinho was not found in the game."
-
-        /**@E o turno não deverá ser passado */
-        val gameUpdated = getFirstGame()
+        Json.decodeFromString<Map<String, String>>(response.bodyAsText())["message"] shouldBe "Player lineuzinho was not found in the game."
+        val gameUpdated = repository.findById(game.id)
         gameUpdated.playerTurn shouldBe 2
-
-        /**@E o jogador alvo não deverá sofrer penalidade */
-        val secondPlayer = gameUpdated.findPlayer("joca")
-        secondPlayer.cards.size shouldBe 7
+        gameUpdated.findPlayer("joca").cards.size shouldBe 7
     }
 
     @Test
     fun `Should return 400 Bad Request and passphrase required when request is invalid`() = testApplication {
-        application {
-            passTurnRoute(PassTurnHandler())
-            configureExceptionHandling()
-            module()
-        }
-        /**@Dado que exista um jogo já criado com 2 jogadores em partida*/
+        application { passTurnRoute(PassTurnHandler(repository)); configureExceptionHandling(); module() }
         val playerList = mutableListOf(
             Domain.player(status = PlayerStatus.PLAYING, owner = false),
             Domain.player(name = "joca", passphrase = "xpto", status = PlayerStatus.PLAYING, number = 2)
         )
-        val game = Domain.game(
-            players = playerList,
-            status = PLAYING,
-            /**@E que o turno é do jogador numero 2*/
-            playerTurn = 2
-        )
-        /**@E que o jogo está em andamento*/
+        val game = Domain.game(players = playerList, status = PLAYING, playerTurn = 2)
         game.initialCards()
-        Games.addGame(game)
+        repository.save(game)
 
-        /**@E que exista uma request com passphrase incorreto*/
-        val requestJson = Json.encodeToString(
-            Request(
-                gameId = game.id.toString(),
-                playerName = game.players.first().name,
-                passphrase = "xpto"
-            )
-        )
+        val requestJson = Json.encodeToString(Request(
+            gameId = game.id.toString(), playerName = game.players.first().name, passphrase = "xpto"
+        ))
 
-        /**@Quando for feito uma requisição para pular a vez do jogador alvo*/
-        val response = client.post("/player/passTurn") {
-            contentType(ContentType.Application.Json)
-            setBody(requestJson)
-        }
+        val response = client.post("/player/passTurn") { contentType(ContentType.Application.Json); setBody(requestJson) }
 
-        /**@Então deverá retornar o status 400*/
         response.status shouldBe HttpStatusCode.BadRequest
-
-        /**@E deverá retornar uma mensagem informando que o passphrase é invalido*/
-        val responseBody = response.bodyAsText()
-        val json = Json.decodeFromString<Map<String, String>>(responseBody)
-        json["message"] shouldBe "Invalid passphrase."
-
-        /**@E o turno não deverá ser passado */
-        val gameUpdated = getFirstGame()
+        Json.decodeFromString<Map<String, String>>(response.bodyAsText())["message"] shouldBe "Invalid passphrase."
+        val gameUpdated = repository.findById(game.id)
         gameUpdated.playerTurn shouldBe 2
-
-        /**@E o jogador alvo não deverá sofrer penalidade */
-        val secondPlayer = gameUpdated.findPlayer("joca")
-        secondPlayer.cards.size shouldBe 7
+        gameUpdated.findPlayer("joca").cards.size shouldBe 7
     }
 }

@@ -7,12 +7,14 @@ import MyMessages.you_have_buy_a_parity_card
 import com.example.application.command.BuyCard
 import com.example.application.model.Card
 import com.example.application.model.GameStatus
-import com.example.application.model.Games
 import com.example.application.ports.inbound.CommandHandler
+import com.example.application.ports.outbound.GameRepository
 
-class BuyCardHandler : CommandHandler<BuyCard, Card> {
+class BuyCardHandler(
+    private val repository: GameRepository
+) : CommandHandler<BuyCard, Card> {
     override suspend fun handle(command: BuyCard): Card {
-        val game = Games.findGameById(command.gameId)
+        val game = repository.findById(command.gameId)
         val player = game.findPlayer(command.playerName)
 
         require(player.passphrase == command.passphrase) { passphrase_invalid }
@@ -22,6 +24,7 @@ class BuyCardHandler : CommandHandler<BuyCard, Card> {
         if (player.buyParityCard) {
             game.passTurn()
             player.buyParityCard = false
+            repository.save(game)
             throw IllegalStateException(you_have_buy_a_parity_card.toString())
         }
 
@@ -33,10 +36,12 @@ class BuyCardHandler : CommandHandler<BuyCard, Card> {
         if (!game.stacks.verifyParity(card)) {
             game.passTurn()
             player.buyParityCard = false
+            repository.save(game)
             return card
         }
 
         player.buyParityCard = true
+        repository.save(game)
         return card
     }
 }

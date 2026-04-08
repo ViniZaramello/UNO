@@ -40,13 +40,13 @@ fun main() {
         val joinPlayerInGameHandler = JoinPlayerInGameHandler(repository)
         val endGameHandler = EndGameHandler(repository)
         val startGameHandler = StartGameHandler(repository)
-        val flagLastCardHandler = FlagLastCardHandler()
-        val throwCardHandler = ThrowCardHandler()
-        val skipPlayerHandler = SkipPlayerHandler()
-        val buyCardHandler = BuyCardHandler()
+        val flagLastCardHandler = FlagLastCardHandler(repository)
+        val throwCardHandler = ThrowCardHandler(repository)
+        val skipPlayerHandler = SkipPlayerHandler(repository)
+        val buyCardHandler = BuyCardHandler(repository)
         val kickPlayer = KickPlayerHandler(repository)
         val quitGame = QuitGameHandler(repository)
-        val passTurn = PassTurnHandler()
+        val passTurn = PassTurnHandler(repository)
 
         gameEndpointConfig(
             createGame = createGameHandler,

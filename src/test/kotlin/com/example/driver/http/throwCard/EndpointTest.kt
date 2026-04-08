@@ -5,12 +5,11 @@ import com.example.application.handler.ThrowCardHandler
 import com.example.application.model.Colors
 import com.example.application.model.GameStatus.FINISHED
 import com.example.application.model.GameStatus.PLAYING
-import com.example.application.model.Games
 import com.example.application.model.PlayerStatus
 import com.example.application.model.SpecialType
 import com.example.application.shared.commonCardList
-import com.example.application.shared.getFirstGame
 import com.example.configuration.configureExceptionHandling
+import com.example.driven.InMemoryGameRepository
 import com.example.module
 import io.kotest.matchers.shouldBe
 import io.ktor.client.request.post
@@ -28,62 +27,46 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class EndpointTest {
+
+    private val repository = InMemoryGameRepository()
+
     @AfterEach
-    fun after() {
-        Games.games.clear()
-    }
+    fun after() { repository.clear() }
 
     @BeforeEach
-    fun before() {
-        Games.games.clear()
-    }
+    fun before() { repository.clear() }
 
     @Test
     fun `Should return 202 when player throw a card`() = testApplication {
-        application {
-            throwCardRoute(ThrowCardHandler())
-            module()
-        }
+        application { throwCardRoute(ThrowCardHandler(repository)); module() }
         /**@Dado que exista um jogo já criado com 2 jogadores em partida*/
         val playerList = mutableListOf(
             Domain.player(status = PlayerStatus.PLAYING),
             Domain.player(name = "joca", passphrase = "xpto", status = PlayerStatus.PLAYING, number = 2)
         )
-        val game = Domain.game(
-            players = playerList,
-            status = PLAYING,
-            /**@E que o turno é do jogador numero 1*/
-            playerTurn = 1
-        )
+        val game = Domain.game(players = playerList, status = PLAYING, playerTurn = 1)
         val cardInHand = Domain.card(name = "four red", number = "4")
 
         /**@E que o jogo está em andamento*/
         game.initialCards()
         game.stacks.cardsInTable.add(Domain.card())
         game.players.first().cards.add(cardInHand)
-        Games.addGame(game)
+        repository.save(game)
 
         /**@E que exista uma request com dados validos*/
-        val requestJson = Json.encodeToString(
-            Request(
-                gameId = game.id.toString(),
-                playerName = game.players.first().name,
-                passphrase = game.players.first().passphrase,
-                cardId = cardInHand.id
-            )
-        )
+        val requestJson = Json.encodeToString(Request(
+            gameId = game.id.toString(), playerName = game.players.first().name,
+            passphrase = game.players.first().passphrase, cardId = cardInHand.id
+        ))
 
         /**@Quando for feito uma requisição para lançar uma carta*/
-        val response = client.post("/player/throwCard") {
-            contentType(ContentType.Application.Json)
-            setBody(requestJson)
-        }
+        val response = client.post("/player/throwCard") { contentType(ContentType.Application.Json); setBody(requestJson) }
 
         /**@Então deverá retornar o status 202*/
         response.status shouldBe HttpStatusCode.Accepted
 
         /**@E o turno do jogador deve ser alterado para o proximo player*/
-        val gameUpdated = getFirstGame()
+        val gameUpdated = repository.findById(game.id)
         gameUpdated.playerTurn shouldBe 2
 
         /**@E o primeiro jogador deverá permanecer com 7 cartas na mão*/
@@ -105,62 +88,34 @@ class EndpointTest {
 
     @Test
     fun `Should return 202 when player throw a special card for purchase`() = testApplication {
-        application {
-            throwCardRoute(ThrowCardHandler())
-            module()
-        }
+        application { throwCardRoute(ThrowCardHandler(repository)); module() }
         /**@Dado que exista um jogo já criado com 2 jogadores em partida*/
         val playerList = mutableListOf(
             Domain.player(status = PlayerStatus.PLAYING, cards = commonCardList()),
-            Domain.player(
-                name = "joca",
-                passphrase = "xpto",
-                status = PlayerStatus.PLAYING,
-                number = 2,
-                cards = commonCardList()
-            )
+            Domain.player(name = "joca", passphrase = "xpto", status = PlayerStatus.PLAYING, number = 2, cards = commonCardList())
         )
-        val game = Domain.game(
-            players = playerList,
-            status = PLAYING,
-            /**@E que o turno é do jogador numero 1*/
-            playerTurn = 1
-        )
-        val cardInHand = Domain.card(
-            name = "buy-four",
-            number = "plusFour",
-            special = SpecialType.BUY_FOUR,
-            color = Colors.BLACK
-        )
+        val game = Domain.game(players = playerList, status = PLAYING, playerTurn = 1)
+        val cardInHand = Domain.card(name = "buy-four", number = "plusFour", special = SpecialType.BUY_FOUR, color = Colors.BLACK)
 
         /**@E que o jogo está em andamento*/
         game.stacks.cardsInTable.add(Domain.card())
         game.players.first().cards.add(cardInHand)
-        Games.addGame(game)
+        repository.save(game)
 
         /**@E que exista uma request com dados validos*/
-        val requestJson = Json.encodeToString(
-            Request(
-                gameId = game.id.toString(),
-                playerName = game.players.first().name,
-                passphrase = game.players.first().passphrase,
-                cardId = cardInHand.id,
-                color = "blue"
-
-            )
-        )
+        val requestJson = Json.encodeToString(Request(
+            gameId = game.id.toString(), playerName = game.players.first().name,
+            passphrase = game.players.first().passphrase, cardId = cardInHand.id, color = "blue"
+        ))
 
         /**@Quando for feito uma requisição para lançar uma carta*/
-        val response = client.post("/player/throwCard") {
-            contentType(ContentType.Application.Json)
-            setBody(requestJson)
-        }
+        val response = client.post("/player/throwCard") { contentType(ContentType.Application.Json); setBody(requestJson) }
 
         /**@Então deverá retornar o status 202*/
         response.status shouldBe HttpStatusCode.Accepted
 
         /**@E o turno do jogador deve ser passado novamente para o jogador que lançou*/
-        val gameUpdated = getFirstGame()
+        val gameUpdated = repository.findById(game.id)
         gameUpdated.playerTurn shouldBe 1
 
         /**@E o primeiro jogador deverá permanecer com 7 cartas na mão*/
@@ -182,67 +137,35 @@ class EndpointTest {
 
     @Test
     fun `Should return 202 when player throw a block card and skip next player`() = testApplication {
-        application {
-            throwCardRoute(ThrowCardHandler())
-            module()
-        }
+        application { throwCardRoute(ThrowCardHandler(repository)); module() }
         /**@Dado que exista um jogo já criado com 3 jogadores em partida*/
         val playerList = mutableListOf(
             Domain.player(status = PlayerStatus.PLAYING, cards = commonCardList()),
-            Domain.player(
-                name = "joca",
-                passphrase = "xpto",
-                status = PlayerStatus.PLAYING,
-                number = 2,
-                cards = commonCardList()
-            ),
-            Domain.player(
-                name = "carlos",
-                passphrase = "xpto",
-                status = PlayerStatus.PLAYING,
-                number = 3,
-                cards = commonCardList()
-            )
+            Domain.player(name = "joca", passphrase = "xpto", status = PlayerStatus.PLAYING, number = 2, cards = commonCardList()),
+            Domain.player(name = "carlos", passphrase = "xpto", status = PlayerStatus.PLAYING, number = 3, cards = commonCardList())
         )
-        val game = Domain.game(
-            players = playerList,
-            status = PLAYING,
-            /**@E que o turno é do jogador numero 1*/
-            playerTurn = 1
-        )
-        val cardInHand = Domain.card(
-            name = "block",
-            number = "block",
-            special = SpecialType.BLOCK,
-            color = Colors.RED
-        )
+        val game = Domain.game(players = playerList, status = PLAYING, playerTurn = 1)
+        val cardInHand = Domain.card(name = "block", number = "block", special = SpecialType.BLOCK, color = Colors.RED)
 
         /**@E que o jogo está em andamento*/
         game.stacks.cardsInTable.add(Domain.card())
         game.players.first().cards.add(cardInHand)
-        Games.addGame(game)
+        repository.save(game)
 
         /**@E que exista uma request com dados validos*/
-        val requestJson = Json.encodeToString(
-            Request(
-                gameId = game.id.toString(),
-                playerName = game.players.first().name,
-                passphrase = game.players.first().passphrase,
-                cardId = cardInHand.id
-            )
-        )
+        val requestJson = Json.encodeToString(Request(
+            gameId = game.id.toString(), playerName = game.players.first().name,
+            passphrase = game.players.first().passphrase, cardId = cardInHand.id
+        ))
 
         /**@Quando for feito uma requisição para lançar uma carta*/
-        val response = client.post("/player/throwCard") {
-            contentType(ContentType.Application.Json)
-            setBody(requestJson)
-        }
+        val response = client.post("/player/throwCard") { contentType(ContentType.Application.Json); setBody(requestJson) }
 
         /**@Então deverá retornar o status 202*/
         response.status shouldBe HttpStatusCode.Accepted
 
         /**@E o turno do jogador deve ser alterado para o proximo player*/
-        val gameUpdated = getFirstGame()
+        val gameUpdated = repository.findById(game.id)
         gameUpdated.playerTurn shouldBe 3
 
         /**@E o primeiro jogador deverá permanecer com 3 cartas na mão*/
@@ -263,167 +186,93 @@ class EndpointTest {
     }
 
     @Test
-    fun `Should return 202 when player throw a special card for purchase when next player have a purshase card`() =
-        testApplication {
-            application {
-                throwCardRoute(ThrowCardHandler())
-                module()
-            }
-            /**@Dado que exista um jogo já criado com 2 jogadores em partida*/
-            val firstPlayerSpecialCard = Domain.card(
-                name = "buy-four",
-                number = "plusFour",
-                special = SpecialType.BUY_FOUR,
-                color = Colors.BLACK
-            )
-            val secondPlayerSpecialCard = Domain.card(
-                name = "buy-four",
-                number = "plusFour",
-                special = SpecialType.BUY_FOUR,
-                color = Colors.BLACK
-            )
+    fun `Should return 202 when player throw a special card for purchase when next player have a purshase card`() = testApplication {
+        application { throwCardRoute(ThrowCardHandler(repository)); module() }
+        /**@Dado que exista um jogo já criado com 2 jogadores em partida*/
+        val firstPlayerSpecialCard = Domain.card(name = "buy-four", number = "plusFour", special = SpecialType.BUY_FOUR, color = Colors.BLACK)
+        val secondPlayerSpecialCard = Domain.card(name = "buy-four", number = "plusFour", special = SpecialType.BUY_FOUR, color = Colors.BLACK)
 
-            val firstPlayerCards = commonCardList()
-            firstPlayerCards.add(firstPlayerSpecialCard)
+        val firstPlayerCards = commonCardList().also { it.add(firstPlayerSpecialCard) }
+        val secondPlayerCards = commonCardList().also { it.add(secondPlayerSpecialCard) }
+        val playerList = mutableListOf(
+            Domain.player(status = PlayerStatus.PLAYING, cards = firstPlayerCards),
+            Domain.player(name = "joca", passphrase = "xpto", status = PlayerStatus.PLAYING, number = 2, cards = secondPlayerCards)
+        )
+        val game = Domain.game(players = playerList, status = PLAYING, playerTurn = 1)
 
-            val secondPlayerCards = commonCardList()
-            secondPlayerCards.add(secondPlayerSpecialCard)
+        /**@E que o jogo está em andamento*/
+        game.stacks.cardsInTable.add(Domain.card())
+        repository.save(game)
 
-            val playerList = mutableListOf(
-                Domain.player(status = PlayerStatus.PLAYING, cards = firstPlayerCards),
-                Domain.player(
-                    name = "joca",
-                    passphrase = "xpto",
-                    status = PlayerStatus.PLAYING,
-                    number = 2,
-                    cards = secondPlayerCards
-                )
-            )
+        /**@E que exista uma request com dados validos*/
+        val requestJson = Json.encodeToString(Request(
+            gameId = game.id.toString(), playerName = game.players.first().name,
+            passphrase = game.players.first().passphrase, cardId = firstPlayerSpecialCard.id, color = "blue"
+        ))
 
-            val game = Domain.game(
-                players = playerList,
-                status = PLAYING,
-                /**@E que o turno é do jogador numero 1*/
-                playerTurn = 1
-            )
+        /**@Quando for feito uma requisição para lançar uma carta*/
+        val response = client.post("/player/throwCard") { contentType(ContentType.Application.Json); setBody(requestJson) }
 
+        /**@Então deverá retornar o status 202*/
+        response.status shouldBe HttpStatusCode.Accepted
 
-            /**@E que o jogo está em andamento*/
-            game.stacks.cardsInTable.add(Domain.card())
-            Games.addGame(game)
+        /**@E o turno do jogador deve ser passado para o proximo jogador*/
+        val gameUpdated = repository.findById(game.id)
+        gameUpdated.playerTurn shouldBe 2
 
-            /**@E que exista uma request com dados validos*/
-            val requestJson = Json.encodeToString(
-                Request(
-                    gameId = game.id.toString(),
-                    playerName = game.players.first().name,
-                    passphrase = game.players.first().passphrase,
-                    cardId = firstPlayerSpecialCard.id,
-                    color = "blue"
+        /**@E deverá adicionar a quantidade de cartas como pendencia*/
+        gameUpdated.buyCardQuantity shouldBe 4
 
-                )
-            )
+        /**@E o primeiro jogador deverá permanecer com 3 cartas na mão*/
+        val firstPlayer = gameUpdated.findPlayer("Player")
+        firstPlayer.cards.size shouldBe 3
 
-            /**@Quando for feito uma requisição para lançar uma carta*/
-            val response = client.post("/player/throwCard") {
-                contentType(ContentType.Application.Json)
-                setBody(requestJson)
-            }
+        /**@E o segundo jogador não deverá conter alteração no total de cartas em sua mão*/
+        val secondPlayer = gameUpdated.findPlayer("joca")
+        secondPlayer.cards.size shouldBe 4
 
-            /**@Então deverá retornar o status 202*/
-            response.status shouldBe HttpStatusCode.Accepted
-
-            /**@E o turno do jogador deve ser passado para o proximo jogador*/
-            val gameUpdated = getFirstGame()
-            gameUpdated.playerTurn shouldBe 2
-
-            /**@E deverá adicionar a quantidade de cartas como pendencia*/
-            gameUpdated.buyCardQuantity shouldBe 4
-
-            /**@E o primeiro jogador deverá permanecer com 3 cartas na mão*/
-            val firstPlayer = gameUpdated.findPlayer("Player")
-            firstPlayer.cards.size shouldBe 3
-
-            /**@E o segundo jogador não deverá conter alteração no total de cartas em sua mão*/
-            val secondPlayer = gameUpdated.findPlayer("joca")
-            secondPlayer.cards.size shouldBe 4
-
-            /**@E a carta lançada deverá ser adicionada na pilha da mesa*/
-            gameUpdated.stacks.cardsInTable.size shouldBe 3
-            gameUpdated.stacks.cardsInTable.last().id shouldBe firstPlayerSpecialCard.id
-            gameUpdated.stacks.cardsInTable.last().name shouldBe firstPlayerSpecialCard.name
-            gameUpdated.stacks.cardsInTable.last().color shouldBe firstPlayerSpecialCard.color
-            gameUpdated.stacks.cardsInTable.last().number shouldBe firstPlayerSpecialCard.number
-            gameUpdated.stacks.cardsInTable.last().especial shouldBe firstPlayerSpecialCard.especial
-        }
+        /**@E a carta lançada deverá ser adicionada na pilha da mesa*/
+        gameUpdated.stacks.cardsInTable.size shouldBe 3
+        gameUpdated.stacks.cardsInTable.last().id shouldBe firstPlayerSpecialCard.id
+        gameUpdated.stacks.cardsInTable.last().name shouldBe firstPlayerSpecialCard.name
+        gameUpdated.stacks.cardsInTable.last().color shouldBe firstPlayerSpecialCard.color
+        gameUpdated.stacks.cardsInTable.last().number shouldBe firstPlayerSpecialCard.number
+        gameUpdated.stacks.cardsInTable.last().especial shouldBe firstPlayerSpecialCard.especial
+    }
 
     @Test
     fun `Should return 202 when player throw a reverse card`() = testApplication {
-        application {
-            throwCardRoute(ThrowCardHandler())
-            module()
-        }
+        application { throwCardRoute(ThrowCardHandler(repository)); module() }
         /**@Dado que exista um jogo já criado com 3 jogadores em partida*/
         val playerList = mutableListOf(
             Domain.player(status = PlayerStatus.PLAYING, cards = commonCardList()),
-            Domain.player(
-                name = "joca",
-                passphrase = "xpto",
-                status = PlayerStatus.PLAYING,
-                number = 2,
-                cards = commonCardList()
-            ),
-            Domain.player(
-                name = "abu",
-                passphrase = "xpto",
-                status = PlayerStatus.PLAYING,
-                number = 3,
-                cards = commonCardList()
-            )
+            Domain.player(name = "joca", passphrase = "xpto", status = PlayerStatus.PLAYING, number = 2, cards = commonCardList()),
+            Domain.player(name = "abu", passphrase = "xpto", status = PlayerStatus.PLAYING, number = 3, cards = commonCardList())
         )
-        val game = Domain.game(
-            players = playerList,
-            status = PLAYING,
-            /**@E que o turno é do jogador numero 1*/
-            playerTurn = 1
-        )
-        val cardInHand = Domain.card(
-            name = "reverse red",
-            number = "reverse",
-            special = SpecialType.REVERSE,
-            color = Colors.RED
-        )
+        val game = Domain.game(players = playerList, status = PLAYING, playerTurn = 1)
+        val cardInHand = Domain.card(name = "reverse red", number = "reverse", special = SpecialType.REVERSE, color = Colors.RED)
 
         /**@E que o jogo está em andamento*/
         game.stacks.cardsInTable.add(Domain.card())
         game.players.first().cards.add(cardInHand)
-        Games.addGame(game)
+        repository.save(game)
 
         /**@E que exista uma request com dados validos*/
-        val requestJson = Json.encodeToString(
-            Request(
-                gameId = game.id.toString(),
-                playerName = game.players.first().name,
-                passphrase = game.players.first().passphrase,
-                cardId = cardInHand.id,
-                color = "blue"
-
-            )
-        )
+        val requestJson = Json.encodeToString(Request(
+            gameId = game.id.toString(), playerName = game.players.first().name,
+            passphrase = game.players.first().passphrase, cardId = cardInHand.id, color = "blue"
+        ))
 
         /**@Quando for feito uma requisição para lançar uma carta*/
-        val response = client.post("/player/throwCard") {
-            contentType(ContentType.Application.Json)
-            setBody(requestJson)
-        }
+        val response = client.post("/player/throwCard") { contentType(ContentType.Application.Json); setBody(requestJson) }
 
         /**@Então deverá retornar o status 202*/
         response.status shouldBe HttpStatusCode.Accepted
 
         /**@E o turno do jogador deve ser passado para o terceiro jogador*/
-        val gameUpdated = getFirstGame()
+        val gameUpdated = repository.findById(game.id)
         gameUpdated.playerTurn shouldBe 3
-        game.reverse shouldBe true
+        gameUpdated.reverse shouldBe true
 
         /**@E o primeiro jogador deverá permanecer com 3 cartas na mão*/
         val firstPlayer = gameUpdated.findPlayer("Player")
@@ -440,55 +289,34 @@ class EndpointTest {
 
     @Test
     fun `Should return 202 when player throw a last card`() = testApplication {
-        application {
-            throwCardRoute(ThrowCardHandler())
-            module()
-        }
+        application { throwCardRoute(ThrowCardHandler(repository)); module() }
         /**@Dado que exista um jogo já criado com 2 jogadores em partida*/
         val playerList = mutableListOf(
             Domain.player(status = PlayerStatus.PLAYING, lastCard = true),
-            Domain.player(
-                name = "joca",
-                passphrase = "xpto",
-                status = PlayerStatus.PLAYING,
-                number = 2,
-                cards = commonCardList()
-            )
+            Domain.player(name = "joca", passphrase = "xpto", status = PlayerStatus.PLAYING, number = 2, cards = commonCardList())
         )
-        val game = Domain.game(
-            players = playerList,
-            status = PLAYING,
-            /**@E que o turno é do jogador numero 1*/
-            playerTurn = 1
-        )
+        val game = Domain.game(players = playerList, status = PLAYING, playerTurn = 1)
         val cardInHand = Domain.card(name = "four red", number = "4")
 
         /**@E que o jogo está em andamento*/
         game.stacks.cardsInTable.add(Domain.card())
         game.players.first().cards.add(cardInHand)
-        Games.addGame(game)
+        repository.save(game)
 
         /**@E que exista uma request com dados validos*/
-        val requestJson = Json.encodeToString(
-            Request(
-                gameId = game.id.toString(),
-                playerName = game.players.first().name,
-                passphrase = game.players.first().passphrase,
-                cardId = cardInHand.id
-            )
-        )
+        val requestJson = Json.encodeToString(Request(
+            gameId = game.id.toString(), playerName = game.players.first().name,
+            passphrase = game.players.first().passphrase, cardId = cardInHand.id
+        ))
 
         /**@Quando for feito uma requisição para lançar uma carta*/
-        val response = client.post("/player/throwCard") {
-            contentType(ContentType.Application.Json)
-            setBody(requestJson)
-        }
+        val response = client.post("/player/throwCard") { contentType(ContentType.Application.Json); setBody(requestJson) }
 
         /**@Então deverá retornar o status 202*/
         response.status shouldBe HttpStatusCode.Accepted
 
         /**@E o turno do jogador deve ser alterado para o proximo player*/
-        val gameUpdated = getFirstGame()
+        val gameUpdated = repository.findById(game.id)
         gameUpdated.playerTurn shouldBe 2
 
         /**@E o primeiro jogador deverá permanecer com nenhuma carta na mão*/
@@ -513,55 +341,34 @@ class EndpointTest {
 
     @Test
     fun `Should return 202 when player throw a last card and not signal`() = testApplication {
-        application {
-            throwCardRoute(ThrowCardHandler())
-            module()
-        }
+        application { throwCardRoute(ThrowCardHandler(repository)); module() }
         /**@Dado que exista um jogo já criado com 2 jogadores em partida*/
         val playerList = mutableListOf(
             Domain.player(status = PlayerStatus.PLAYING),
-            Domain.player(
-                name = "joca",
-                passphrase = "xpto",
-                status = PlayerStatus.PLAYING,
-                number = 2,
-                cards = commonCardList()
-            )
+            Domain.player(name = "joca", passphrase = "xpto", status = PlayerStatus.PLAYING, number = 2, cards = commonCardList())
         )
-        val game = Domain.game(
-            players = playerList,
-            status = PLAYING,
-            /**@E que o turno é do jogador numero 1*/
-            playerTurn = 1
-        )
+        val game = Domain.game(players = playerList, status = PLAYING, playerTurn = 1)
         val cardInHand = Domain.card(name = "four red", number = "4")
 
         /**@E que o jogo está em andamento*/
         game.stacks.cardsInTable.add(Domain.card())
         game.players.first().cards.add(cardInHand)
-        Games.addGame(game)
+        repository.save(game)
 
         /**@E que exista uma request com dados validos*/
-        val requestJson = Json.encodeToString(
-            Request(
-                gameId = game.id.toString(),
-                playerName = game.players.first().name,
-                passphrase = game.players.first().passphrase,
-                cardId = cardInHand.id
-            )
-        )
+        val requestJson = Json.encodeToString(Request(
+            gameId = game.id.toString(), playerName = game.players.first().name,
+            passphrase = game.players.first().passphrase, cardId = cardInHand.id
+        ))
 
         /**@Quando for feito uma requisição para lançar uma carta*/
-        val response = client.post("/player/throwCard") {
-            contentType(ContentType.Application.Json)
-            setBody(requestJson)
-        }
+        val response = client.post("/player/throwCard") { contentType(ContentType.Application.Json); setBody(requestJson) }
 
         /**@Então deverá retornar o status 202*/
         response.status shouldBe HttpStatusCode.Accepted
 
         /**@E o turno do jogador deve ser alterado para o proximo player*/
-        val gameUpdated = getFirstGame()
+        val gameUpdated = repository.findById(game.id)
         gameUpdated.playerTurn shouldBe 2
 
         /**@E o primeiro jogador deverá permanecer com duas cartas na mão*/
@@ -583,49 +390,26 @@ class EndpointTest {
 
     @Test
     fun `Should return 400 Bad Request when color is invalid`() = testApplication {
-        application {
-            throwCardRoute(ThrowCardHandler())
-            configureExceptionHandling()
-            module()
-        }
+        application { throwCardRoute(ThrowCardHandler(repository)); configureExceptionHandling(); module() }
         /**@Dado que exista um jogo já criado com 2 jogadores em partida*/
+        val cardInHand = Domain.card(color = Colors.BLACK, name = "change-color", number = "changeColor", special = SpecialType.CHANGE_COLOR)
         val playerList = mutableListOf(
             Domain.player(status = PlayerStatus.PLAYING, owner = false),
             Domain.player(name = "joca", passphrase = "xpto", status = PlayerStatus.PLAYING, number = 2)
         )
-        val cardInHand = Domain.card(
-            color = Colors.BLACK,
-            name = "change-color",
-            number = "changeColor",
-            special = SpecialType.CHANGE_COLOR
-        )
-        val game = Domain.game(
-            players = playerList,
-            status = PLAYING,
-            /**@E que o turno é do jogador numero 1*/
-            playerTurn = 1
-        )
-        /**@E que o jogo está em andamento*/
+        val game = Domain.game(players = playerList, status = PLAYING, playerTurn = 1)
         game.players.first().cards.add(cardInHand)
         game.initialCards()
-        Games.addGame(game)
+        repository.save(game)
 
         /**@E que exista uma request com uma cor invalida*/
-        val requestJson = Json.encodeToString(
-            Request(
-                gameId = game.id.toString(),
-                playerName = game.players.first().name,
-                passphrase = game.players.first().passphrase,
-                cardId = game.players.first().cards.first().id,
-                color = "purple"
-            )
-        )
+        val requestJson = Json.encodeToString(Request(
+            gameId = game.id.toString(), playerName = game.players.first().name,
+            passphrase = game.players.first().passphrase, cardId = game.players.first().cards.first().id, color = "purple"
+        ))
 
         /**@Quando for feito uma requisição para lançar uma carta*/
-        val response = client.post("/player/throwCard") {
-            contentType(ContentType.Application.Json)
-            setBody(requestJson)
-        }
+        val response = client.post("/player/throwCard") { contentType(ContentType.Application.Json); setBody(requestJson) }
 
         /**@Então deverá retornar o status 400*/
         response.status shouldBe HttpStatusCode.BadRequest
@@ -636,7 +420,7 @@ class EndpointTest {
         json["message"] shouldBe "The color purple is not valid."
 
         /**@E o turno não deverá ser passado */
-        val gameUpdated = getFirstGame()
+        val gameUpdated = repository.findById(game.id)
         gameUpdated.playerTurn shouldBe 1
 
         /**@E os jogadores não deverão sofrer alteração na quantidade de carta */
@@ -649,41 +433,24 @@ class EndpointTest {
 
     @Test
     fun `Should return 400 Bad Request when player name is invalid`() = testApplication {
-        application {
-            throwCardRoute(ThrowCardHandler())
-            configureExceptionHandling()
-            module()
-        }
+        application { throwCardRoute(ThrowCardHandler(repository)); configureExceptionHandling(); module() }
         /**@Dado que exista um jogo já criado com 2 jogadores em partida*/
         val playerList = mutableListOf(
             Domain.player(status = PlayerStatus.PLAYING, owner = false),
             Domain.player(name = "joca", passphrase = "xpto", status = PlayerStatus.PLAYING, number = 2)
         )
-        val game = Domain.game(
-            players = playerList,
-            status = PLAYING,
-            /**@E que o turno é do jogador numero 2*/
-            playerTurn = 2
-        )
-        /**@E que o jogo está em andamento*/
+        val game = Domain.game(players = playerList, status = PLAYING, playerTurn = 2)
         game.initialCards()
-        Games.addGame(game)
+        repository.save(game)
 
         /**@E que exista uma request com jogador inexistente*/
-        val requestJson = Json.encodeToString(
-            Request(
-                gameId = game.id.toString(),
-                playerName = "lineuzinho",
-                passphrase = game.players.first().passphrase,
-                cardId = game.players.first().cards.first().id
-            )
-        )
+        val requestJson = Json.encodeToString(Request(
+            gameId = game.id.toString(), playerName = "lineuzinho",
+            passphrase = game.players.first().passphrase, cardId = game.players.first().cards.first().id
+        ))
 
         /**@Quando for feito uma requisição para pular um jogador*/
-        val response = client.post("/player/throwCard") {
-            contentType(ContentType.Application.Json)
-            setBody(requestJson)
-        }
+        val response = client.post("/player/throwCard") { contentType(ContentType.Application.Json); setBody(requestJson) }
 
         /**@Então deverá retornar o status 400*/
         response.status shouldBe HttpStatusCode.BadRequest
@@ -694,7 +461,7 @@ class EndpointTest {
         json["message"] shouldBe "Player lineuzinho was not found in the game."
 
         /**@E o turno não deverá ser passado */
-        val gameUpdated = getFirstGame()
+        val gameUpdated = repository.findById(game.id)
         gameUpdated.playerTurn shouldBe 2
 
         /**@E os jogadores não deverão sofrer alteração na quantidade de carta */
@@ -707,41 +474,24 @@ class EndpointTest {
 
     @Test
     fun `Should return 400 Bad Request when it is not the target player turn`() = testApplication {
-        application {
-            throwCardRoute(ThrowCardHandler())
-            configureExceptionHandling()
-            module()
-        }
+        application { throwCardRoute(ThrowCardHandler(repository)); configureExceptionHandling(); module() }
         /**@Dado que exista um jogo já criado com 2 jogadores em partida*/
         val playerList = mutableListOf(
             Domain.player(status = PlayerStatus.PLAYING, owner = false),
             Domain.player(name = "joca", passphrase = "xpto", status = PlayerStatus.PLAYING, number = 2)
         )
-        val game = Domain.game(
-            players = playerList,
-            status = PLAYING,
-            /**@E que o turno é do jogador numero 2*/
-            playerTurn = 2
-        )
-        /**@E que o jogo está em andamento*/
+        val game = Domain.game(players = playerList, status = PLAYING, playerTurn = 2)
         game.initialCards()
-        Games.addGame(game)
+        repository.save(game)
 
         /**@E que exista uma request valida*/
-        val requestJson = Json.encodeToString(
-            Request(
-                gameId = game.id.toString(),
-                playerName = game.players.first().name,
-                passphrase = game.players.first().passphrase,
-                cardId = game.players.first().cards.first().id
-            )
-        )
+        val requestJson = Json.encodeToString(Request(
+            gameId = game.id.toString(), playerName = game.players.first().name,
+            passphrase = game.players.first().passphrase, cardId = game.players.first().cards.first().id
+        ))
 
         /**@Quando for feito uma requisição para lançar uma carta*/
-        val response = client.post("/player/throwCard") {
-            contentType(ContentType.Application.Json)
-            setBody(requestJson)
-        }
+        val response = client.post("/player/throwCard") { contentType(ContentType.Application.Json); setBody(requestJson) }
 
         /**@Então deverá retornar o status 400*/
         response.status shouldBe HttpStatusCode.BadRequest
@@ -752,7 +502,7 @@ class EndpointTest {
         json["message"] shouldBe "It is not your turn to play a card."
 
         /**@E a carta não deverá ser adicionado na pilha da mesa*/
-        val gameUpdated = getFirstGame()
+        val gameUpdated = repository.findById(game.id)
         gameUpdated.stacks.cardsInTable.size shouldBe 1
 
         /**@E o turno deverá permanecer para o jogador 2*/
@@ -769,32 +519,21 @@ class EndpointTest {
 
     @Test
     fun `Should return 400 Bad Request when gameStatus is different of PLAYING`() = testApplication {
-        application {
-            throwCardRoute(ThrowCardHandler())
-            configureExceptionHandling()
-            module()
-        }
+        application { throwCardRoute(ThrowCardHandler(repository)); configureExceptionHandling(); module() }
         /**@Dado que exista um jogo já criado e com o status FINISHED*/
         val players = mutableListOf(Domain.player(), Domain.player(name = "joca", passphrase = "xpto"))
         val game = Domain.game(status = FINISHED, players = players)
         game.initialCards()
-        Games.addGame(game)
+        repository.save(game)
 
         /**@E que exista uma request valida*/
-        val requestJson = Json.encodeToString(
-            Request(
-                gameId = game.id.toString(),
-                playerName = game.players.first().name,
-                passphrase = game.players.first().passphrase,
-                cardId = game.players.first().cards.first().id
-            )
-        )
+        val requestJson = Json.encodeToString(Request(
+            gameId = game.id.toString(), playerName = game.players.first().name,
+            passphrase = game.players.first().passphrase, cardId = game.players.first().cards.first().id
+        ))
 
         /**@Quando for feito uma requisição para lançar uma carta*/
-        val response = client.post("/player/throwCard") {
-            contentType(ContentType.Application.Json)
-            setBody(requestJson)
-        }
+        val response = client.post("/player/throwCard") { contentType(ContentType.Application.Json); setBody(requestJson) }
 
         /**@Então deverá retornar o status 400*/
         response.status shouldBe HttpStatusCode.BadRequest
@@ -805,7 +544,7 @@ class EndpointTest {
         json["message"] shouldBe "The game must be started before you can play."
 
         /**@E a carta não deverá ir para a pilha da mesa*/
-        val gameUpdated = getFirstGame()
+        val gameUpdated = repository.findById(game.id)
         gameUpdated.stacks.cardsInTable.size shouldBe 1
 
         /**@E o turno não deverá ser passado para o proximo jogador*/
@@ -818,41 +557,24 @@ class EndpointTest {
 
     @Test
     fun `Should return 400 Bad Request and passphrase required when request is invalid`() = testApplication {
-        application {
-            throwCardRoute(ThrowCardHandler())
-            configureExceptionHandling()
-            module()
-        }
+        application { throwCardRoute(ThrowCardHandler(repository)); configureExceptionHandling(); module() }
         /**@Dado que exista um jogo já criado com 2 jogadores em partida*/
         val playerList = mutableListOf(
             Domain.player(status = PlayerStatus.PLAYING, owner = false),
             Domain.player(name = "joca", passphrase = "xpto", status = PlayerStatus.PLAYING, number = 2)
         )
-        val game = Domain.game(
-            players = playerList,
-            status = PLAYING,
-            /**@E que o turno é do jogador numero 1*/
-            playerTurn = 1
-        )
-        /**@E que o jogo está em andamento*/
+        val game = Domain.game(players = playerList, status = PLAYING, playerTurn = 1)
         game.initialCards()
-        Games.addGame(game)
+        repository.save(game)
 
         /**@E que exista uma request com passphrase incorreto*/
-        val requestJson = Json.encodeToString(
-            Request(
-                gameId = game.id.toString(),
-                playerName = game.players.first().name,
-                passphrase = "xpto",
-                cardId = game.players.first().cards.first().id
-            )
-        )
+        val requestJson = Json.encodeToString(Request(
+            gameId = game.id.toString(), playerName = game.players.first().name,
+            passphrase = "xpto", cardId = game.players.first().cards.first().id
+        ))
 
         /**@Quando for feito uma requisição para lançar uma carta*/
-        val response = client.post("/player/throwCard") {
-            contentType(ContentType.Application.Json)
-            setBody(requestJson)
-        }
+        val response = client.post("/player/throwCard") { contentType(ContentType.Application.Json); setBody(requestJson) }
 
         /**@Então deverá retornar o status 400*/
         response.status shouldBe HttpStatusCode.BadRequest
@@ -863,7 +585,7 @@ class EndpointTest {
         json["message"] shouldBe "Invalid passphrase."
 
         /**@E a carta não deverá ir para a pilha da mesa*/
-        val gameUpdated = getFirstGame()
+        val gameUpdated = repository.findById(game.id)
         gameUpdated.stacks.cardsInTable.size shouldBe 1
 
         /**@E o turno não deverá ser passado para o proximo jogador*/
@@ -876,41 +598,24 @@ class EndpointTest {
 
     @Test
     fun `Should return 400 Bad Request when cardId is invalid`() = testApplication {
-        application {
-            throwCardRoute(ThrowCardHandler())
-            configureExceptionHandling()
-            module()
-        }
+        application { throwCardRoute(ThrowCardHandler(repository)); configureExceptionHandling(); module() }
         /**@Dado que exista um jogo já criado com 2 jogadores em partida*/
         val playerList = mutableListOf(
             Domain.player(status = PlayerStatus.PLAYING, owner = false),
             Domain.player(name = "joca", passphrase = "xpto", status = PlayerStatus.PLAYING, number = 2)
         )
-        val game = Domain.game(
-            players = playerList,
-            status = PLAYING,
-            /**@E que o turno é do jogador numero 1*/
-            playerTurn = 1
-        )
-        /**@E que o jogo está em andamento*/
+        val game = Domain.game(players = playerList, status = PLAYING, playerTurn = 1)
         game.initialCards()
-        Games.addGame(game)
+        repository.save(game)
 
         /**@E que exista uma request com um cardId inexistente*/
-        val requestJson = Json.encodeToString(
-            Request(
-                gameId = game.id.toString(),
-                playerName = game.players.first().name,
-                passphrase = game.players.first().passphrase,
-                cardId = randomUUID().toString()
-            )
-        )
+        val requestJson = Json.encodeToString(Request(
+            gameId = game.id.toString(), playerName = game.players.first().name,
+            passphrase = game.players.first().passphrase, cardId = randomUUID().toString()
+        ))
 
         /**@Quando for feito uma requisição para lançar uma carta*/
-        val response = client.post("/player/throwCard") {
-            contentType(ContentType.Application.Json)
-            setBody(requestJson)
-        }
+        val response = client.post("/player/throwCard") { contentType(ContentType.Application.Json); setBody(requestJson) }
 
         /**@Então deverá retornar o status 400*/
         response.status shouldBe HttpStatusCode.BadRequest
@@ -921,7 +626,7 @@ class EndpointTest {
         json["message"] shouldBe "The player does not have this card in hand."
 
         /**@E a carta não deverá ir para a pilha da mesa*/
-        val gameUpdated = getFirstGame()
+        val gameUpdated = repository.findById(game.id)
         gameUpdated.stacks.cardsInTable.size shouldBe 1
 
         /**@E o turno não deverá ser passado para o proximo jogador*/
@@ -934,42 +639,25 @@ class EndpointTest {
 
     @Test
     fun `Should return 400 Bad Request when gameId is invalid`() = testApplication {
-        application {
-            throwCardRoute(ThrowCardHandler())
-            configureExceptionHandling()
-            module()
-        }
+        application { throwCardRoute(ThrowCardHandler(repository)); configureExceptionHandling(); module() }
         /**@Dado que exista um jogo já criado com 2 jogadores em partida*/
         val playerList = mutableListOf(
             Domain.player(status = PlayerStatus.PLAYING, owner = false),
             Domain.player(name = "joca", passphrase = "xpto", status = PlayerStatus.PLAYING, number = 2)
         )
-        val game = Domain.game(
-            players = playerList,
-            status = PLAYING,
-            /**@E que o turno é do jogador numero 1*/
-            playerTurn = 1
-        )
-        /**@E que o jogo está em andamento*/
+        val game = Domain.game(players = playerList, status = PLAYING, playerTurn = 1)
         game.initialCards()
-        Games.addGame(game)
+        repository.save(game)
 
         /**@E que exista uma request com um gameId inexistente*/
         val invalidUuid = randomUUID().toString()
-        val requestJson = Json.encodeToString(
-            Request(
-                gameId = invalidUuid,
-                playerName = game.players.first().name,
-                passphrase = game.players.first().passphrase,
-                cardId = game.players.first().cards.first().id
-            )
-        )
+        val requestJson = Json.encodeToString(Request(
+            gameId = invalidUuid, playerName = game.players.first().name,
+            passphrase = game.players.first().passphrase, cardId = game.players.first().cards.first().id
+        ))
 
         /**@Quando for feito uma requisição para lançar uma carta*/
-        val response = client.post("/player/throwCard") {
-            contentType(ContentType.Application.Json)
-            setBody(requestJson)
-        }
+        val response = client.post("/player/throwCard") { contentType(ContentType.Application.Json); setBody(requestJson) }
 
         /**@Então deverá retornar o status 400*/
         response.status shouldBe HttpStatusCode.BadRequest
@@ -980,7 +668,7 @@ class EndpointTest {
         json["message"] shouldBe "Game $invalidUuid was not found."
 
         /**@E a carta não deverá ir para a pilha da mesa*/
-        val gameUpdated = getFirstGame()
+        val gameUpdated = repository.findById(game.id)
         gameUpdated.stacks.cardsInTable.size shouldBe 1
 
         /**@E o turno não deverá ser passado para o proximo jogador*/
@@ -993,49 +681,27 @@ class EndpointTest {
 
     @Test
     fun `Should return 400 Bad Request when parity is invalid`() = testApplication {
-        application {
-            throwCardRoute(ThrowCardHandler())
-            configureExceptionHandling()
-            module()
-        }
+        application { throwCardRoute(ThrowCardHandler(repository)); configureExceptionHandling(); module() }
         /**@Dado que exista um jogo já criado com 2 jogadores em partida*/
+        val cardInHand = Domain.card(color = Colors.BLUE, name = "eight blue", number = "8", special = SpecialType.NONE)
         val playerList = mutableListOf(
             Domain.player(status = PlayerStatus.PLAYING, owner = false),
             Domain.player(name = "joca", passphrase = "xpto", status = PlayerStatus.PLAYING, number = 2)
         )
-        val cardInHand = Domain.card(
-            color = Colors.BLUE,
-            name = "eight blue",
-            number = "8",
-            special = SpecialType.NONE
-        )
-        val game = Domain.game(
-            players = playerList,
-            status = PLAYING,
-            /**@E que o turno é do jogador numero 1*/
-            playerTurn = 1
-        )
-        /**@E que o jogo está em andamento*/
+        val game = Domain.game(players = playerList, status = PLAYING, playerTurn = 1)
         game.players.first().cards.add(cardInHand)
         game.initialCards()
         game.stacks.cardsInTable.add(Domain.card())
-        Games.addGame(game)
+        repository.save(game)
 
         /**@E que exista uma request com uma cor invalida*/
-        val requestJson = Json.encodeToString(
-            Request(
-                gameId = game.id.toString(),
-                playerName = game.players.first().name,
-                passphrase = game.players.first().passphrase,
-                cardId = game.players.first().cards.first().id
-            )
-        )
+        val requestJson = Json.encodeToString(Request(
+            gameId = game.id.toString(), playerName = game.players.first().name,
+            passphrase = game.players.first().passphrase, cardId = game.players.first().cards.first().id
+        ))
 
         /**@Quando for feito uma requisição para lançar uma carta*/
-        val response = client.post("/player/throwCard") {
-            contentType(ContentType.Application.Json)
-            setBody(requestJson)
-        }
+        val response = client.post("/player/throwCard") { contentType(ContentType.Application.Json); setBody(requestJson) }
 
         /**@Então deverá retornar o status 400*/
         response.status shouldBe HttpStatusCode.BadRequest
@@ -1046,7 +712,7 @@ class EndpointTest {
         json["message"] shouldBe "The card does not have any similar characteristics to the card on the table."
 
         /**@E o turno não deverá ser passado */
-        val gameUpdated = getFirstGame()
+        val gameUpdated = repository.findById(game.id)
         gameUpdated.playerTurn shouldBe 1
         gameUpdated.stacks.cardsInTable.size shouldBe 2
 
