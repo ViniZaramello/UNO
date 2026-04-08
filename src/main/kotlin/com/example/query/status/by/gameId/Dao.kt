@@ -1,13 +1,15 @@
 package com.example.query.status.by.gameId
 
-import com.example.application.model.Games
+import com.example.application.ports.outbound.GameRepository
 import com.example.query.response.PlayerStats
 import com.example.query.response.GameStats
 import java.util.UUID
 
-class Dao {
+class Dao(
+    private val repository: GameRepository
+) {
     fun getGameStats(gameId: UUID): GameStats {
-        val game = Games.findGameById(gameId)
+        val game = repository.findById(gameId)
         val playerTurn = game.findPlayerByTurn(game.playerTurn)
 
         val gameStats = GameStats(
@@ -29,7 +31,6 @@ class Dao {
         )
 
         return gameStats
-
     }
 }
 

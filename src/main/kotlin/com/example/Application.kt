@@ -24,6 +24,8 @@ import io.ktor.server.application.install
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import org.koin.dsl.module
+import org.koin.core.context.startKoin
 
 fun main() {
     val port = System.getenv("PORT")?.toInt() ?: 8080
@@ -63,7 +65,7 @@ fun main() {
             quitGame = quitGame,
             passTurn = passTurn
         )
-        queryEndpointConfig()
+        queryEndpointConfig(repository)
     }.start(wait = true)
 }
 

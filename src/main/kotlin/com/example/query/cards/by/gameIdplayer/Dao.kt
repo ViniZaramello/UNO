@@ -1,7 +1,7 @@
 package com.example.query.cards.by.gameIdplayer
 
 import MyMessages.passphrase_invalid
-import com.example.application.model.Games
+import com.example.application.ports.outbound.GameRepository
 import com.example.query.cards.by.gameIdplayer.response.PlayerDetails
 import com.example.query.cards.by.gameIdplayer.response.Response
 import com.example.query.response.GameStats
@@ -9,10 +9,10 @@ import com.example.query.response.PlayerStats
 import java.util.UUID
 
 class Dao(
-    private val games: Games
+    private val repository: GameRepository
 ) {
     fun getPlayerHandCards(gameId: UUID, playerName: String, passphrase: String): Response {
-        val game = games.findGameById(gameId)
+        val game = repository.findById(gameId)
         val player = game.findPlayer(playerName)
         val playerTurn = game.findPlayerByTurn(game.playerTurn)
 

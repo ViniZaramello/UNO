@@ -1,6 +1,7 @@
 package com.example.query.status.by.gameId
 
 import MyMessages.require_game_id
+import com.example.application.ports.outbound.GameRepository
 import com.example.query.response.GameStats
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
@@ -17,14 +18,14 @@ class Endpoint(
     }
 }
 
-fun Application.getGameStats() {
+fun Application.getGameStats(repository: GameRepository) {
     routing {
         get("/query/{gameId}/stats") {
             val gameId = UUID.fromString(call.parameters["gameId"]?.trim())
 
             require(gameId != null) { require_game_id }
 
-            val gameStats = Endpoint(Dao()).query(gameId)
+            val gameStats = Endpoint(Dao(repository)).query(gameId)
 
             call.respond(HttpStatusCode.OK, gameStats)
         }
