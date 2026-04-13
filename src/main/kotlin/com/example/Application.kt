@@ -1,20 +1,8 @@
 package com.example
 
-import com.example.application.handler.BuyCardHandler
-import com.example.application.handler.CreateGameHandler
-import com.example.application.handler.EndGameHandler
-import com.example.application.handler.FlagLastCardHandler
-import com.example.application.handler.JoinPlayerInGameHandler
-import com.example.application.handler.KickPlayerHandler
-import com.example.application.handler.PassTurnHandler
-import com.example.application.handler.QuitGameHandler
-import com.example.application.handler.SkipPlayerHandler
-import com.example.application.handler.StartGameHandler
-import com.example.application.handler.ThrowCardHandler
 import com.example.configuration.configureExceptionHandling
 import com.example.configuration.configureFrameworks
 import com.example.configuration.configureHTTP
-import com.example.driven.InMemoryGameRepository
 import com.example.driver.http.gameEndpointConfig
 import com.example.driver.http.playerEndpointConfig
 import com.example.query.queryEndpointConfig
@@ -24,8 +12,6 @@ import io.ktor.server.application.install
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
-import org.koin.dsl.module
-import org.koin.core.context.startKoin
 
 fun main() {
     val port = System.getenv("PORT")?.toInt() ?: 8080
@@ -36,36 +22,9 @@ fun main() {
         configureSerialization()
         configureRouting()
 
-        val repository = InMemoryGameRepository()
-
-        val createGameHandler = CreateGameHandler(repository)
-        val joinPlayerInGameHandler = JoinPlayerInGameHandler(repository)
-        val endGameHandler = EndGameHandler(repository)
-        val startGameHandler = StartGameHandler(repository)
-        val flagLastCardHandler = FlagLastCardHandler(repository)
-        val throwCardHandler = ThrowCardHandler(repository)
-        val skipPlayerHandler = SkipPlayerHandler(repository)
-        val buyCardHandler = BuyCardHandler(repository)
-        val kickPlayer = KickPlayerHandler(repository)
-        val quitGame = QuitGameHandler(repository)
-        val passTurn = PassTurnHandler(repository)
-
-        gameEndpointConfig(
-            createGame = createGameHandler,
-            joinPlayerInGame = joinPlayerInGameHandler,
-            endGame = endGameHandler,
-            startGame = startGameHandler,
-            skipPlayer = skipPlayerHandler,
-            kickPlayer = kickPlayer,
-        )
-        playerEndpointConfig(
-            flagLastCard = flagLastCardHandler,
-            throwCard = throwCardHandler,
-            buyCard = buyCardHandler,
-            quitGame = quitGame,
-            passTurn = passTurn
-        )
-        queryEndpointConfig(repository)
+        gameEndpointConfig()
+        playerEndpointConfig()
+        queryEndpointConfig()
     }.start(wait = true)
 }
 
